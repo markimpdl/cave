@@ -361,7 +361,7 @@ function main() {
   }
 
   function update(dt) {
-    const mv = 8.7 * dt, rot = 2.4 * dt;   // 2.9× the original walk speed
+    const mv = 3.3 * dt, rot = 2.4 * dt;   // 1.10× the normal walk speed
     if (keys.tl) yaw += rot;
     if (keys.tr) yaw -= rot;
     let fx = 0, fz = 0;
