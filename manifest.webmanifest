@@ -1,0 +1,15 @@
+{
+  "name": "Cave Explorer 3D",
+  "short_name": "Cave 3D",
+  "description": "A scary 3D cave: collect the gems, escape the monster.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#05040a",
+  "theme_color": "#05040a",
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

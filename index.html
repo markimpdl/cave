@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Cave Explorer 3D</title>
+
+<!-- PWA / iPhone home-screen app -->
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#05040a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cave 3D">
+<link rel="apple-touch-icon" href="./icons/icon-180.png">
+<link rel="icon" type="image/png" href="./icons/icon-192.png">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; background: #05040a; overflow: hidden;
+    font-family: 'Segoe UI', 'Trebuchet MS', sans-serif; color: #e8e0d0;
+    user-select: none; -webkit-user-select: none; touch-action: none; }
+  #app { position: fixed; inset: 0; }
+  canvas { display: block; }
+  #hud { position: fixed; top: 12px; left: 14px; right: 14px; display: flex;
+    justify-content: space-between; font-weight: 800; letter-spacing: 1px;
+    text-shadow: 0 2px 6px #000; pointer-events: none; font-size: clamp(1rem,2.6vw,1.4rem); z-index: 5; }
+  #hud .label { font-size: .58em; opacity: .7; display: block; }
+  .overlay { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center; padding: 24px;
+    background: rgba(5,4,10,0.86); backdrop-filter: blur(4px); transition: opacity .2s; }
+  .overlay.hidden { opacity: 0; pointer-events: none; }
+  .overlay h1 { font-size: clamp(1.9rem,7vw,3.2rem); color: #ffb454;
+    text-shadow: 0 0 22px #ff6a00, 0 0 46px #7a2e00; letter-spacing: 2px; }
+  .overlay p { opacity: .85; margin: 8px 0; max-width: 460px; line-height: 1.5; }
+  .big { font-size: 1.5rem; font-weight: 800; color: #ffd84d; margin: 10px 0; }
+  .btn { margin-top: 18px; background: linear-gradient(135deg,#ff8a3c,#ffcf4d); color: #3a1c00;
+    border: none; padding: 14px 36px; border-radius: 30px; font-size: 1.05rem; font-weight: 800;
+    letter-spacing: 1px; cursor: pointer; box-shadow: 0 6px 22px rgba(255,138,60,.45); transition: transform .12s; }
+  .btn:hover { transform: scale(1.06); }
+  .hint { font-size: .78rem; opacity: .6; margin-top: 16px; line-height: 1.7; }
+  #crosshair { position: fixed; top: 50%; left: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px;
+    border-radius: 50%; background: rgba(255,255,255,.5); z-index: 4; pointer-events: none; }
+  /* mobile virtual joystick */
+  #joy { position: fixed; bottom: 26px; left: 26px; width: 120px; height: 120px; z-index: 6;
+    border-radius: 50%; background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.25);
+    touch-action: none; }
+  #joy.hidden { display: none; }
+  #joyKnob { position: absolute; top: 50%; left: 50%; width: 54px; height: 54px; margin: -27px 0 0 -27px;
+    border-radius: 50%; background: rgba(255,180,84,0.5); border: 2px solid rgba(255,255,255,0.6); }
+  #lookHint { position: fixed; bottom: 30px; right: 22px; font-size: .78rem; opacity: .6; z-index: 6; pointer-events: none; }
+  #lookHint.hidden { display: none; }
+  #ver { position: fixed; bottom: 8px; left: 10px; font-size: .7rem; opacity: .45; font-weight: 700; z-index: 6; }
+  #pauseBtn { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 6;
+    width: 40px; height: 40px; border-radius: 50%; font-size: 1rem; cursor: pointer;
+    background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.35); color: #fff; }
+  #pauseBtn.hidden { display: none; }
+  #danger { position: fixed; inset: 0; z-index: 3; pointer-events: none; opacity: 0;
+    background: radial-gradient(circle at 50% 50%, transparent 35%, rgba(200,0,0,0.55) 100%);
+    transition: opacity .15s; }
+  #jumpscare { position: fixed; inset: 0; z-index: 9999; background: #000; }
+  #jumpscare.hidden { display: none; }
+  #jumpscare svg { width: 100%; height: 100%; animation: jsShake .06s infinite; }
+  @keyframes jsShake {
+    0% { transform: translate(-8px, 5px) scale(1.03); }
+    50% { transform: translate(8px, -6px) scale(1.07); }
+    100% { transform: translate(-5px, -7px) scale(1.04); }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="crosshair"></div>
+<div id="hud">
+  <div><span class="label">GEMS</span><span id="gems">0 / 0</span></div>
+  <div style="text-align:right"><span class="label">TIME</span><span id="time">0.0s</span></div>
+</div>
+<div id="joy" class="hidden"><div id="joyKnob"></div></div>
+<div id="lookHint" class="hidden">drag right side to look 👀</div>
+<button id="pauseBtn" class="hidden" title="Pause">⏸</button>
+<div id="ver">v2.5</div>
+
+<div class="overlay" id="deviceScreen">
+  <h1>🎮 HOW ARE YOU PLAYING?</h1>
+  <p>Pick your controls.</p>
+  <button class="btn" id="pcBtn">🖥️ PC / Laptop</button>
+  <button class="btn" id="deviceBtn" style="margin-top:12px">📱 Phone / Tablet</button>
+  <p class="hint">PC: keyboard &amp; mouse · Phone: on-screen joystick</p>
+</div>
+
+<div class="overlay hidden" id="startScreen">
+  <h1>🕯️ CAVE EXPLORER 3D</h1>
+  <p>Explore the dark cave. Collect every glowing gem 💎, then escape through the portal 🟢.</p>
+  <button class="btn" id="startBtn">▶ ENTER THE CAVE</button>
+  <p class="hint">Desktop: WASD to move · <b>hold &amp; drag the mouse</b> to look around<br>Mobile: buttons to move · drag to look</p>
+</div>
+<div class="overlay hidden" id="loadScreen"><h1>Loading…</h1><p id="loadMsg">Preparing the cave</p></div>
+<div class="overlay hidden" id="winScreen">
+  <h1 style="color:#5adf9e;text-shadow:0 0 20px #5adf9e">ESCAPED! 🎉</h1>
+  <div class="big" id="winTime"></div>
+  <p id="winMsg"></p>
+  <button class="btn" id="againBtn">↻ NEW CAVE</button>
+</div>
+<div id="danger"></div>
+<div id="jumpscare" class="hidden">
+  <svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <radialGradient id="jeye"><stop offset="0" stop-color="#fff"/><stop offset=".28" stop-color="#ff2a00"/><stop offset="1" stop-color="#2a0000"/></radialGradient>
+      <radialGradient id="jhead"><stop offset="0" stop-color="#1a0810"/><stop offset="1" stop-color="#000"/></radialGradient>
+    </defs>
+    <rect width="200" height="200" fill="#000"/>
+    <ellipse cx="100" cy="102" rx="86" ry="100" fill="url(#jhead)"/>
+    <circle cx="64" cy="82" r="28" fill="url(#jeye)"/>
+    <circle cx="136" cy="82" r="28" fill="url(#jeye)"/>
+    <circle cx="64" cy="82" r="8" fill="#000"/>
+    <circle cx="136" cy="82" r="8" fill="#000"/>
+    <path d="M34 52 L92 74 M166 52 L108 74" stroke="#000" stroke-width="7" fill="none"/>
+    <path d="M52 128 Q100 186 148 128 Q100 152 52 128 Z" fill="#180000"/>
+    <g fill="#e8e0d0">
+      <polygon points="58,130 70,130 64,154"/><polygon points="74,133 86,133 80,160"/>
+      <polygon points="92,135 104,135 98,164"/><polygon points="110,133 122,133 116,160"/>
+      <polygon points="126,130 138,130 132,154"/>
+    </g>
+    <g fill="#e8e0d0"><polygon points="64,150 74,150 69,134"/><polygon points="82,152 92,152 87,133"/><polygon points="100,153 110,153 105,134"/><polygon points="118,150 128,150 123,134"/></g>
+  </svg>
+</div>
+<div class="overlay hidden" id="caughtScreen">
+  <h1 style="color:#ff3b3b;text-shadow:0 0 22px #ff0000">CAUGHT! 👹</h1>
+  <div class="big" id="caughtTime"></div>
+  <p>The cave creature got you…</p>
+  <button class="btn" id="caughtBtn">↻ TRY AGAIN</button>
+</div>
+<div class="overlay hidden" id="pauseScreen">
+  <h1>PAUSED</h1>
+  <div class="big" id="pauseGems"></div>
+  <button class="btn" id="resumeBtn">▶ RESUME</button>
+  <button class="btn" id="mainBtn" style="background:rgba(255,255,255,0.15);color:#fff;box-shadow:none;">☰ MAIN MENU</button>
+</div>
+<div class="overlay hidden" id="errScreen">
+  <h1 style="color:#ff6b6b">Can't load 3D</h1>
+  <p>This 3D version needs an internet connection (it loads the Three.js engine). Please connect and reload.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+if (!window.THREE) {
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('errScreen').classList.remove('hidden');
+} else { main(); }
+
+function main() {
+  const MAPW = 15, MAPH = 15;   // odd
+  const app = document.getElementById('app');
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  app.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x05040a);
+  scene.fog = new THREE.FogExp2(0x040308, 0.18);
+
+  const camera = new THREE.PerspectiveCamera(75, 1, 0.05, 60);
+  camera.rotation.order = 'YXZ';
+
+  // lights: dim ambient + a warm torch that follows the player
+  scene.add(new THREE.AmbientLight(0x180d06, 0.4));
+  const torch = new THREE.PointLight(0xffb060, 2.2, 9, 2);
+  scene.add(torch);
+  const fill = new THREE.HemisphereLight(0x14202a, 0x120a06, 0.35);
+  scene.add(fill);
+
+  // materials
+  const rockMat = new THREE.MeshStandardMaterial({ color: 0x6b5642, roughness: 1, metalness: 0 });
+  const floorMat = new THREE.MeshStandardMaterial({ color: 0x2a2018, roughness: 1 });
+  const ceilMat = new THREE.MeshStandardMaterial({ color: 0x151019, roughness: 1 });
+
+  let map, wallMesh, gemGroup, gems, totalGems, collected, exitCell, exitMesh, exitOpen;
+  let posX, posZ, yaw = 0, pitch = 0;
+  let state = 'start', startT = 0, elapsed = 0, best;
+  const keys = { fwd: false, back: false, sl: false, sr: false, tl: false, tr: false };
+  let inputMode = 'pc';                 // 'pc' or 'device'
+  const joy = { x: 0, y: 0 };           // virtual joystick vector (-1..1)
+  try { best = Number(localStorage.getItem('cave3dBest')) || 0; } catch (e) { best = 0; }
+
+  // ---- the scary monster (a looming wraith) ----
+  const monster = new THREE.Group();
+  const wraithMat = new THREE.MeshStandardMaterial({ color: 0x0c0409, emissive: 0x1a0008, roughness: 1, transparent: true, opacity: 0.92 });
+  const body = new THREE.Mesh(new THREE.ConeGeometry(0.44, 1.7, 12), wraithMat);
+  body.position.y = 0.78; body.rotation.x = Math.PI; monster.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.32, 14, 14), wraithMat);
+  head.position.y = 1.18; monster.add(head);
+  const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff2200 });
+  const eyes = [];
+  for (const sx of [-0.13, 0.13]) {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.075, 10, 10), eyeMat);
+    eye.position.set(sx, 1.22, 0.27); monster.add(eye); eyes.push(eye);
+  }
+  // jagged glowing mouth
+  const mouth = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.22, 6), new THREE.MeshBasicMaterial({ color: 0xaa0000 }));
+  mouth.position.set(0, 1.0, 0.28); mouth.rotation.x = Math.PI; monster.add(mouth);
+  const monLight = new THREE.PointLight(0xff1200, 1.2, 4.5, 2);
+  monLight.position.y = 1.1; monster.add(monLight);
+  monster.visible = false;
+  scene.add(monster);
+  let monX = 0, monZ = 0, flow = null, flowCell = null, hbTimer = 0, whisperTimer = 0;
+  const MON_SPEED = 2.35;   // a touch slower than you (3.0), but relentless
+
+  // ---- procedural horror audio ----
+  let actx = null, masterGain, droneGain, drone1, drone2;
+  function initAudio() {
+    if (actx) { if (actx.state === 'suspended') actx.resume(); return; }
+    try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { actx = null; return; }
+    masterGain = actx.createGain(); masterGain.gain.value = 0.95; masterGain.connect(actx.destination);
+    droneGain = actx.createGain(); droneGain.gain.value = 0; droneGain.connect(masterGain);
+    drone1 = actx.createOscillator(); drone1.type = 'sawtooth'; drone1.frequency.value = 51;
+    drone2 = actx.createOscillator(); drone2.type = 'sawtooth'; drone2.frequency.value = 51.7;
+    drone1.connect(droneGain); drone2.connect(droneGain); drone1.start(); drone2.start();
+  }
+  function heartbeat() {
+    if (!actx) return;
+    const t = actx.currentTime;
+    for (const d of [0, 0.16]) {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(62, t + d); o.frequency.exponentialRampToValueAtTime(32, t + d + 0.14);
+      g.gain.setValueAtTime(0.0001, t + d); g.gain.linearRampToValueAtTime(0.55, t + d + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.22);
+      o.connect(g).connect(masterGain); o.start(t + d); o.stop(t + d + 0.24);
+    }
+  }
+  function whisper() {
+    if (!actx) return;
+    const t = actx.currentTime, dur = 0.5 + Math.random() * 0.7;
+    const buf = actx.createBuffer(1, (actx.sampleRate * dur) | 0, actx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const n = actx.createBufferSource(); n.buffer = buf;
+    const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1000 + Math.random() * 1800; bp.Q.value = 7;
+    const g = actx.createGain();
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.28, t + dur * 0.4); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    n.connect(bp).connect(g).connect(masterGain); n.start(t);
+  }
+  function screech() {
+    if (!actx) return;
+    const t = actx.currentTime;
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(950, t); o.frequency.exponentialRampToValueAtTime(110, t + 0.65);
+    g.gain.setValueAtTime(0.7, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.75);
+    const buf = actx.createBuffer(1, (actx.sampleRate * 0.5) | 0, actx.sampleRate), dd = buf.getChannelData(0);
+    for (let i = 0; i < dd.length; i++) dd[i] = (Math.random() * 2 - 1) * (1 - i / dd.length);
+    const n = actx.createBufferSource(); n.buffer = buf; const ng = actx.createGain(); ng.gain.value = 0.6;
+    o.connect(g).connect(masterGain); n.connect(ng).connect(masterGain);
+    o.start(t); o.stop(t + 0.75); n.start(t);
+  }
+
+  // floor & ceiling
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(MAPW * 2, MAPH * 2), floorMat);
+  floor.rotation.x = -Math.PI / 2; floor.position.set(MAPW / 2, 0, MAPH / 2); scene.add(floor);
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(MAPW * 2, MAPH * 2), ceilMat);
+  ceil.rotation.x = Math.PI / 2; ceil.position.set(MAPW / 2, 1, MAPH / 2); scene.add(ceil);
+
+  function genMaze() {
+    map = Array.from({ length: MAPH }, () => Array(MAPW).fill(1));
+    const stack = [[1, 1]]; map[1][1] = 0;
+    while (stack.length) {
+      const [cx, cy] = stack[stack.length - 1];
+      const dirs = [[0, -2], [0, 2], [-2, 0], [2, 0]].sort(() => Math.random() - 0.5);
+      let moved = false;
+      for (const [dx, dy] of dirs) {
+        const nx = cx + dx, ny = cy + dy;
+        if (nx > 0 && ny > 0 && nx < MAPW - 1 && ny < MAPH - 1 && map[ny][nx] === 1) {
+          map[cy + dy / 2][cx + dx / 2] = 0; map[ny][nx] = 0; stack.push([nx, ny]); moved = true; break;
+        }
+      }
+      if (!moved) stack.pop();
+    }
+    for (let i = 0; i < MAPW * MAPH * 0.10; i++) {
+      const x = 1 + ((Math.random() * (MAPW - 2)) | 0), y = 1 + ((Math.random() * (MAPH - 2)) | 0);
+      map[y][x] = 0;
+    }
+  }
+
+  function buildWalls() {
+    if (wallMesh) scene.remove(wallMesh);
+    const cells = [];
+    for (let y = 0; y < MAPH; y++) for (let x = 0; x < MAPW; x++) if (map[y][x]) cells.push([x, y]);
+    const geo = new THREE.BoxGeometry(1, 1, 1);
+    wallMesh = new THREE.InstancedMesh(geo, rockMat, cells.length);
+    const m = new THREE.Matrix4();
+    cells.forEach((c, i) => { m.makeTranslation(c[0], 0.5, c[1]); wallMesh.setMatrixAt(i, m); });
+    wallMesh.instanceMatrix.needsUpdate = true;
+    scene.add(wallMesh);
+  }
+
+  function openCells() {
+    const c = [];
+    for (let y = 1; y < MAPH - 1; y++) for (let x = 1; x < MAPW - 1; x++) if (map[y][x] === 0) c.push([x, y]);
+    return c;
+  }
+
+  // BFS distance field from the player's cell → the monster follows it downhill to hunt you
+  function computeFlow(tx, ty) {
+    flow = Array.from({ length: MAPH }, () => Array(MAPW).fill(-1));
+    if (map[ty][tx]) return;
+    flow[ty][tx] = 0;
+    const q = [[tx, ty]];
+    while (q.length) {
+      const [x, y] = q.shift();
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx, ny = y + dy;
+        if (nx >= 0 && ny >= 0 && nx < MAPW && ny < MAPH && !map[ny][nx] && flow[ny][nx] < 0) {
+          flow[ny][nx] = flow[y][x] + 1; q.push([nx, ny]);
+        }
+      }
+    }
+  }
+
+  function setupLevel() {
+    genMaze(); buildWalls();
+    posX = 1; posZ = 1; yaw = 0; pitch = 0;
+    const cells = openCells().filter(([x, y]) => Math.hypot(x - 1, y - 1) > 3);
+    let far = cells[0] || [MAPW - 2, MAPH - 2], fd = 0;
+    for (const c of cells) { const d = Math.hypot(c[0] - 1, c[1] - 1); if (d > fd) { fd = d; far = c; } }
+    exitCell = far;
+    const pool = cells.filter(c => !(c[0] === far[0] && c[1] === far[1]));
+    if (gemGroup) scene.remove(gemGroup);
+    gemGroup = new THREE.Group(); scene.add(gemGroup);
+    gems = []; totalGems = Math.min(6, pool.length);
+    const gemGeo = new THREE.IcosahedronGeometry(0.16, 0);
+    for (let i = 0; i < totalGems; i++) {
+      const idx = (Math.random() * pool.length) | 0, c = pool.splice(idx, 1)[0];
+      const mat = new THREE.MeshStandardMaterial({ color: 0x8ff0ff, emissive: 0x33cfff, emissiveIntensity: 1.4, roughness: .3 });
+      const mesh = new THREE.Mesh(gemGeo, mat);
+      mesh.position.set(c[0], 0.5, c[1]);
+      gemGroup.add(mesh);
+      gems.push({ x: c[0], z: c[1], mesh, got: false });
+    }
+    // exit portal (hidden until all gems collected)
+    if (exitMesh) scene.remove(exitMesh);
+    const em = new THREE.MeshStandardMaterial({ color: 0x5adf9e, emissive: 0x2fdf88, emissiveIntensity: 1.6, roughness: .3 });
+    exitMesh = new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.09, 12, 24), em);
+    exitMesh.position.set(exitCell[0], 0.5, exitCell[1]);
+    exitMesh.visible = false; scene.add(exitMesh);
+    collected = 0; exitOpen = false;
+    document.getElementById('gems').textContent = '0 / ' + totalGems;
+    // spawn the monster at the farthest cell from the player so it starts hunting from afar
+    const mc = far;
+    monX = mc[0]; monZ = mc[1];
+    monster.position.set(monX, 0, monZ); monster.visible = true;
+    flow = null; flowCell = null;
+    document.getElementById('danger').style.opacity = 0;
+  }
+
+  function canWalk(x, z) {
+    const r = 0.28;
+    for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) {
+      const cx = Math.round(x) + dx, cy = Math.round(z) + dz;
+      if (cx < 0 || cy < 0 || cx >= MAPW || cy >= MAPH || map[cy][cx]) {
+        const nx = Math.max(cx - 0.5, Math.min(cx + 0.5, x));
+        const nz = Math.max(cy - 0.5, Math.min(cy + 0.5, z));
+        if ((x - nx) ** 2 + (z - nz) ** 2 < r * r) return false;
+      }
+    }
+    return true;
+  }
+
+  function update(dt) {
+    const mv = 8.7 * dt, rot = 2.4 * dt;   // 2.9× the original walk speed
+    if (keys.tl) yaw += rot;
+    if (keys.tr) yaw -= rot;
+    let fx = 0, fz = 0;
+    const sinY = Math.sin(yaw), cosY = Math.cos(yaw);
+    if (keys.fwd) { fx -= sinY; fz -= cosY; }
+    if (keys.back) { fx += sinY; fz += cosY; }
+    if (keys.sl) { fx -= cosY; fz += sinY; }
+    if (keys.sr) { fx += cosY; fz -= sinY; }
+    // virtual joystick (device mode): up = forward, sideways = strafe
+    if (joy.x || joy.y) {
+      const fwdA = -joy.y, rightA = joy.x;
+      fx += (-sinY) * fwdA + (cosY) * rightA;
+      fz += (-cosY) * fwdA + (-sinY) * rightA;
+    }
+    const len = Math.hypot(fx, fz);
+    if (len > 0) {
+      fx = fx / len * mv; fz = fz / len * mv;
+      if (canWalk(posX + fx, posZ)) posX += fx;
+      if (canWalk(posX, posZ + fz)) posZ += fz;
+    }
+    camera.position.set(posX, 0.5, posZ);
+    camera.rotation.set(pitch, yaw, 0);
+    torch.position.set(posX, 0.62, posZ);
+
+    // animate gems
+    for (const g of gems) if (!g.got) { g.mesh.rotation.y += dt * 2; g.mesh.position.y = 0.5 + Math.sin(performance.now() / 400 + g.x) * 0.06; }
+    if (exitOpen) { exitMesh.rotation.y += dt * 1.5; exitMesh.rotation.z += dt * 0.8; }
+
+    // ---- monster: hunt the player along the BFS flow field ----
+    const pcx = Math.round(posX), pcy = Math.round(posZ);
+    if (!flowCell || flowCell[0] !== pcx || flowCell[1] !== pcy) { computeFlow(pcx, pcy); flowCell = [pcx, pcy]; }
+    const mcx = Math.round(monX), mcy = Math.round(monZ);
+    let tcx = mcx, tcy = mcy, bestD = flow ? (flow[mcy] ? flow[mcy][mcx] : Infinity) : Infinity;
+    if (bestD < 0 || bestD === undefined) bestD = Infinity;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nx = mcx + dx, ny = mcy + dy;
+      if (nx >= 0 && ny >= 0 && nx < MAPW && ny < MAPH && flow && flow[ny][nx] >= 0 && flow[ny][nx] < bestD) {
+        bestD = flow[ny][nx]; tcx = nx; tcy = ny;
+      }
+    }
+    const md = Math.hypot(posX - monX, posZ - monZ) || 0.001;
+    // ARE YOU LOOKING AT IT? it slows to a crawl when watched, and LUNGES when you look away
+    const fwdX = -Math.sin(yaw), fwdZ = -Math.cos(yaw);
+    const dot = fwdX * (monX - posX) / md + fwdZ * (monZ - posZ) / md;
+    const watched = md < 9 && dot > 0.55;
+    const spd = MON_SPEED * (watched ? 0.3 : 2.2) * dt;
+    // move toward the target cell centre
+    const tdx = tcx - monX, tdz = tcy - monZ, td = Math.hypot(tdx, tdz);
+    if (td > 0.02) { monX += tdx / td * Math.min(spd, td); monZ += tdz / td * Math.min(spd, td); }
+    monster.position.set(monX, 0.05 + Math.sin(performance.now() / 500) * 0.05, monZ);
+    monster.rotation.y = Math.atan2(posX - monX, posZ - monZ);   // face the player
+    // pulsing, glaring eyes
+    const pulse = 1 + Math.sin(performance.now() / 140) * 0.25;
+    eyes.forEach(e => e.scale.setScalar(pulse));
+    monLight.intensity = 1.2 + Math.random() * 0.6 + (watched ? 0.6 : 0);
+
+    // proximity: danger glow, audio, camera shake
+    const near = Math.max(0, Math.min(1, (8 - md) / 8));   // 0 far → 1 on top of you
+    document.getElementById('danger').style.opacity = (near * near * 0.95).toFixed(3);
+    if (droneGain) { droneGain.gain.value = near * 0.28; if (drone2) drone2.frequency.value = 51.7 + near * 6; }
+    // heartbeat quickens as it closes in
+    if (md < 9) { hbTimer -= dt; if (hbTimer <= 0) { heartbeat(); hbTimer = 0.3 + (md / 9) * 0.95; } }
+    // creepy whispers drifting through the dark
+    whisperTimer -= dt;
+    if (whisperTimer <= 0 && md < 13) { whisper(); whisperTimer = 1.4 + Math.random() * 3 - near * 1.5; }
+    // torch falters when it's near
+    torch.intensity *= (1 - near * 0.55);
+    // camera shake — heavier the closer it gets
+    if (md < 3.5) {
+      const sh = ((3.5 - md) / 3.5) * 0.09;
+      camera.rotation.set(pitch + (Math.random() - 0.5) * sh, yaw + (Math.random() - 0.5) * sh, (Math.random() - 0.5) * sh);
+    }
+    if (md < 0.6) return caught();
+
+    // pickups
+    for (const g of gems) if (!g.got && Math.hypot(g.x - posX, g.z - posZ) < 0.45) {
+      g.got = true; g.mesh.visible = false; collected++;
+      document.getElementById('gems').textContent = collected + ' / ' + totalGems;
+      if (collected >= totalGems) { exitOpen = true; exitMesh.visible = true; }
+    }
+    if (exitOpen && Math.hypot(exitCell[0] - posX, exitCell[1] - posZ) < 0.5) win();
+
+    elapsed = (performance.now() - startT) / 1000;
+    document.getElementById('time').textContent = elapsed.toFixed(1) + 's';
+  }
+
+  let lastT = 0;
+  function loop(t) {
+    requestAnimationFrame(loop);
+    const dt = Math.min(0.05, (t - lastT) / 1000 || 0); lastT = t;
+    // torch flicker
+    torch.intensity = 2.0 + Math.sin(t / 90) * 0.25 + Math.random() * 0.15;
+    if (state === 'playing') update(dt);
+    renderer.render(scene, camera);
+  }
+
+  function resize() {
+    const w = innerWidth, h = innerHeight;
+    renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize); resize();
+
+  function clearKeys() {
+    for (const k in keys) keys[k] = false; dragging = false;
+    joy.x = 0; joy.y = 0;
+    const kb = document.getElementById('joyKnob'); if (kb) kb.style.transform = '';
+  }
+  function startGame() {
+    initAudio();
+    setupLevel();
+    hbTimer = 0;
+    state = 'playing'; startT = performance.now();
+    document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('winScreen').classList.add('hidden');
+    document.getElementById('pauseScreen').classList.add('hidden');
+    document.getElementById('caughtScreen').classList.add('hidden');
+    document.getElementById('jumpscare').classList.add('hidden');
+    document.getElementById('pauseBtn').classList.remove('hidden');
+    camera.position.set(posX, 0.5, posZ);
+  }
+  function caught() {
+    state = 'caught'; clearKeys();
+    screech();
+    if (droneGain) droneGain.gain.value = 0;
+    document.getElementById('pauseBtn').classList.add('hidden');
+    document.getElementById('danger').style.opacity = 0;
+    // full-screen jump scare, then the game-over card
+    const js = document.getElementById('jumpscare');
+    js.classList.remove('hidden');
+    setTimeout(() => {
+      js.classList.add('hidden');
+      document.getElementById('caughtTime').textContent = 'You survived ' + elapsed.toFixed(1) + 's';
+      document.getElementById('caughtScreen').classList.remove('hidden');
+    }, 950);
+  }
+  function togglePause() {
+    if (state === 'playing') {
+      state = 'paused'; clearKeys();
+      if (droneGain) droneGain.gain.value = 0;
+      document.getElementById('pauseGems').textContent = collected + ' / ' + totalGems + ' gems';
+      document.getElementById('pauseScreen').classList.remove('hidden');
+      document.getElementById('pauseBtn').classList.add('hidden');
+    } else if (state === 'paused') {
+      state = 'playing';
+      startT = performance.now() - elapsed * 1000;   // keep the timer continuous
+      document.getElementById('pauseScreen').classList.add('hidden');
+      document.getElementById('pauseBtn').classList.remove('hidden');
+    }
+  }
+  function goMain() {
+    state = 'start'; clearKeys();
+    monster.visible = false;
+    if (droneGain) droneGain.gain.value = 0;
+    document.getElementById('danger').style.opacity = 0;
+    document.getElementById('pauseScreen').classList.add('hidden');
+    document.getElementById('pauseBtn').classList.add('hidden');
+    document.getElementById('startScreen').classList.remove('hidden');
+  }
+  function win() {
+    state = 'win';
+    if (droneGain) droneGain.gain.value = 0;
+    document.getElementById('pauseBtn').classList.add('hidden');
+    document.getElementById('danger').style.opacity = 0;
+    const isBest = best === 0 || elapsed < best;
+    if (isBest) { best = elapsed; try { localStorage.setItem('cave3dBest', best); } catch (e) {} }
+    document.getElementById('winTime').textContent = 'Time: ' + elapsed.toFixed(1) + 's';
+    document.getElementById('winMsg').textContent = isBest ? '🏆 New best time!' : 'Best: ' + best.toFixed(1) + 's';
+    document.getElementById('winScreen').classList.remove('hidden');
+  }
+  document.getElementById('startBtn').onclick = startGame;
+  document.getElementById('againBtn').onclick = startGame;
+  document.getElementById('resumeBtn').onclick = togglePause;
+  document.getElementById('mainBtn').onclick = goMain;
+  document.getElementById('pauseBtn').onclick = togglePause;
+  document.getElementById('caughtBtn').onclick = startGame;
+
+  // ---- keyboard ----
+  const kmap = { w: 'fwd', arrowup: 'fwd', s: 'back', arrowdown: 'back',
+    a: 'sl', arrowleft: 'tl', d: 'sr', arrowright: 'tr', q: 'sl', e: 'sr' };
+  addEventListener('keydown', e => {
+    const k = e.key.toLowerCase();
+    if (kmap[k]) { keys[kmap[k]] = true; e.preventDefault(); }
+    if ((k === 'p' || k === 'escape') && (state === 'playing' || state === 'paused')) togglePause();
+  });
+  addEventListener('keyup', e => { const k = e.key.toLowerCase(); if (kmap[k]) keys[kmap[k]] = false; });
+
+  // ---- mouse look: hold the mouse button and drag to turn around ----
+  let dragging = false;
+  renderer.domElement.style.cursor = 'grab';
+  renderer.domElement.addEventListener('mousedown', e => {
+    if (state === 'playing') { dragging = true; renderer.domElement.style.cursor = 'grabbing'; e.preventDefault(); }
+  });
+  addEventListener('mouseup', () => { dragging = false; renderer.domElement.style.cursor = 'grab'; });
+  addEventListener('mousemove', e => {
+    if (dragging && state === 'playing') {
+      yaw -= e.movementX * 0.00266;
+      pitch = Math.max(-1.2, Math.min(1.2, pitch - e.movementY * 0.00266));
+    }
+  });
+
+  // ---- device select: PC = keyboard/mouse, Device = joystick + touch look ----
+  function configureControls(mode) {
+    inputMode = mode;
+    const dev = mode === 'device';
+    document.getElementById('joy').classList.toggle('hidden', !dev);
+    document.getElementById('lookHint').classList.toggle('hidden', !dev);
+    document.getElementById('deviceScreen').classList.add('hidden');
+    document.getElementById('startScreen').classList.remove('hidden');
+  }
+  document.getElementById('pcBtn').onclick = () => configureControls('pc');
+  document.getElementById('deviceBtn').onclick = () => configureControls('device');
+
+  // ---- virtual joystick (device) ----
+  const joyEl = document.getElementById('joy'), knob = document.getElementById('joyKnob');
+  const JOY_R = 46;
+  let joyId = null;
+  function joyUpdate(t) {
+    const r = joyEl.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    let dx = t.clientX - cx, dy = t.clientY - cy;
+    const d = Math.hypot(dx, dy);
+    if (d > JOY_R) { dx = dx / d * JOY_R; dy = dy / d * JOY_R; }
+    knob.style.transform = `translate(${dx}px, ${dy}px)`;
+    joy.x = dx / JOY_R; joy.y = dy / JOY_R;
+  }
+  function joyEnd() { joyId = null; joy.x = 0; joy.y = 0; knob.style.transform = ''; }
+  joyEl.addEventListener('touchstart', e => { e.preventDefault(); joyId = e.changedTouches[0].identifier; joyUpdate(e.changedTouches[0]); }, { passive: false });
+  joyEl.addEventListener('touchmove', e => { e.preventDefault(); for (const t of e.changedTouches) if (t.identifier === joyId) joyUpdate(t); }, { passive: false });
+  joyEl.addEventListener('touchend', e => { for (const t of e.changedTouches) if (t.identifier === joyId) joyEnd(); });
+  joyEl.addEventListener('touchcancel', joyEnd);
+
+  // ---- touch look: drag the right half of the screen ----
+  let lookId = null, lx = 0, ly = 0;
+  addEventListener('touchstart', e => {
+    if (inputMode !== 'device' || state !== 'playing') return;
+    for (const t of e.changedTouches) if (t.clientX > innerWidth / 2 && lookId === null) { lookId = t.identifier; lx = t.clientX; ly = t.clientY; }
+  }, { passive: true });
+  addEventListener('touchmove', e => {
+    for (const t of e.changedTouches) if (t.identifier === lookId) {
+      yaw -= (t.clientX - lx) * 0.006; pitch = Math.max(-1.2, Math.min(1.2, pitch - (t.clientY - ly) * 0.006));
+      lx = t.clientX; ly = t.clientY;
+    }
+  }, { passive: true });
+  addEventListener('touchend', e => { for (const t of e.changedTouches) if (t.identifier === lookId) lookId = null; });
+
+  requestAnimationFrame(loop);
+}
+
+// ---- PWA: register the service worker (skipped on file://) ----
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch((err) => console.warn('SW failed:', err));
+  });
+}
+</script>
+</body>
+</html>
