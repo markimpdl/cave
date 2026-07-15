@@ -202,7 +202,7 @@ function main() {
   monster.visible = false;
   scene.add(monster);
   let monX = 0, monZ = 0, flow = null, flowCell = null, hbTimer = 0, whisperTimer = 0;
-  const MON_SPEED = 2.35;   // a touch slower than you (3.0), but relentless
+  const MON_SPEED = 2.1;    // 0.70× the normal walk speed (still lunges when you look away)
 
   // ---- procedural horror audio ----
   let actx = null, masterGain, droneGain, drone1, drone2;
