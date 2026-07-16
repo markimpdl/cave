@@ -1,6 +1,6 @@
 // Service worker for Cave Explorer 3D (PWA).
 // Bump CACHE_VERSION whenever index.html or assets change so clients update.
-const CACHE_VERSION = 'cave3d-v1';
+const CACHE_VERSION = 'cave3d-v2';
 const THREE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
 
 // Relative paths resolve against this file's folder → works on GitHub Pages subpaths.

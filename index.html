@@ -47,13 +47,74 @@
   #joy.hidden { display: none; }
   #joyKnob { position: absolute; top: 50%; left: 50%; width: 54px; height: 54px; margin: -27px 0 0 -27px;
     border-radius: 50%; background: rgba(255,180,84,0.5); border: 2px solid rgba(255,255,255,0.6); }
-  #lookHint { position: fixed; bottom: 30px; right: 22px; font-size: .78rem; opacity: .6; z-index: 6; pointer-events: none; }
+  #lookHint { position: fixed; bottom: 112px; right: 22px; font-size: .78rem; opacity: .6; z-index: 6; pointer-events: none; }
   #lookHint.hidden { display: none; }
   #ver { position: fixed; bottom: 8px; left: 10px; font-size: .7rem; opacity: .45; font-weight: 700; z-index: 6; }
   #pauseBtn { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 6;
     width: 40px; height: 40px; border-radius: 50%; font-size: 1rem; cursor: pointer;
     background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.35); color: #fff; }
   #pauseBtn.hidden { display: none; }
+  .shop-sec { margin: 16px 0 8px; font-size: .72rem; letter-spacing: 2px; opacity: .65; font-weight: 800; }
+  .shop-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 480px; }
+  .shop-item { background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 12px; padding: 10px 12px; min-width: 92px; text-align: center; cursor: pointer;
+    transition: transform .1s, border-color .1s; }
+  .shop-item:hover { transform: translateY(-3px); }
+  .shop-item.equipped { border-color: #5adf9e; }
+  .shop-item.owned { border-color: rgba(255,255,255,0.5); }
+  .shop-item .sw { width: 30px; height: 30px; border-radius: 50%; margin: 0 auto 6px; box-shadow: 0 0 10px currentColor; }
+  .shop-item .nm { font-weight: 700; font-size: .85rem; }
+  .shop-item .pr { font-size: .78rem; opacity: .85; margin-top: 3px; }
+  #atkBtn { position: fixed; bottom: 30px; right: 24px; z-index: 6; width: 72px; height: 72px;
+    border-radius: 50%; font-size: 2rem; cursor: pointer;
+    background: rgba(120,20,20,0.5); border: 2px solid rgba(255,120,120,0.6); }
+  #atkBtn.hidden { display: none; }
+  #atkBtn:active { background: rgba(255,60,60,0.6); transform: scale(0.94); }
+  #mineBtn { position: fixed; bottom: 30px; right: 108px; z-index: 6; width: 64px; height: 64px;
+    border-radius: 50%; font-size: 1.7rem; cursor: pointer;
+    background: rgba(90,110,130,0.5); border: 2px solid rgba(180,200,220,0.6); }
+  #mineBtn.hidden { display: none; }
+  #mineBtn:active { background: rgba(150,180,210,0.6); transform: scale(0.94); }
+  #toast { position: fixed; top: 28%; left: 50%; transform: translateX(-50%); z-index: 7;
+    background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px;
+    padding: 8px 18px; font-weight: 700; color: #ffe; pointer-events: none; white-space: nowrap; }
+  #toast.hidden { display: none; }
+  #monHp {position: fixed; top: 20%; left: 50%; transform: translateX(-50%); z-index: 6;
+    color: #ff8a8a; font-weight: 800; font-size: 1.1rem; text-shadow: 0 2px 6px #000; pointer-events: none; }
+  #monHp.hidden { display: none; }
+  #itembar { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 6;
+    display: flex; gap: 8px; pointer-events: none; }
+  #itembar.hidden { display: none; }
+  #itembar .slot { position: relative; width: 46px; height: 46px; border-radius: 10px;
+    background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.22);
+    display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5); pointer-events: auto; cursor: pointer;
+    transition: transform .08s, box-shadow .08s; }
+  #itembar #itTorch { border-color: rgba(255,190,90,0.8); }
+  #itembar .slot.sel { border-color: #ffe14d; transform: translateY(-6px) scale(1.08);
+    box-shadow: 0 0 14px rgba(255,225,77,0.8); }
+  #itembar .slot .key { position: absolute; top: -1px; left: 3px; font-size: 0.62rem;
+    font-weight: 800; color: rgba(255,255,255,0.55); text-shadow: 0 1px 2px #000; }
+  #itembar .slot .cnt { position: absolute; bottom: -2px; right: 2px; font-size: 0.72rem;
+    font-weight: 800; color: #7fe3ff; text-shadow: 0 1px 3px #000; }
+  #arrows { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); z-index: 5;
+    display: flex; gap: 16px; pointer-events: none; }
+  .ind { position: relative; width: 52px; height: 52px; border-radius: 50%;
+    background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.25); }
+  .ind .ic { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; }
+  .ind .ptr { position: absolute; inset: 0; transition: transform .06s linear; }
+  .ind .ptr::before { content: ''; position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
+    border-left: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 15px solid var(--c);
+    filter: drop-shadow(0 0 4px var(--c)); }
+  #warning { position: fixed; top: 13%; left: 50%; z-index: 7; pointer-events: none;
+    color: #ff3b3b; font-weight: 900; letter-spacing: 2px; font-size: clamp(1rem, 4.5vw, 1.9rem);
+    text-shadow: 0 0 14px #ff0000, 0 2px 6px #000; white-space: nowrap;
+    animation: warnPulse .55s ease-in-out infinite; }
+  #warning.hidden { display: none; }
+  @keyframes warnPulse {
+    0%, 100% { opacity: .45; transform: translateX(-50%) scale(1); }
+    50% { opacity: 1; transform: translateX(-50%) scale(1.09); }
+  }
   #danger { position: fixed; inset: 0; z-index: 3; pointer-events: none; opacity: 0;
     background: radial-gradient(circle at 50% 50%, transparent 35%, rgba(200,0,0,0.55) 100%);
     transition: opacity .15s; }
@@ -74,10 +135,27 @@
   <div><span class="label">GEMS</span><span id="gems">0 / 0</span></div>
   <div style="text-align:right"><span class="label">TIME</span><span id="time">0.0s</span></div>
 </div>
+<div id="arrows">
+  <div class="ind" id="gemInd" style="--c:#4da6ff"><div class="ptr"></div><div class="ic">💎</div></div>
+  <div class="ind" id="exitInd" style="--c:#3bff7a"><div class="ptr"></div><div class="ic">🟢</div></div>
+  <div class="ind" id="helpInd" style="--c:#ffd84d"><div class="ptr"></div><div class="ic">🤖</div></div>
+  <div class="ind" id="monInd" style="--c:#ff3b3b"><div class="ptr"></div><div class="ic">👹</div></div>
+</div>
 <div id="joy" class="hidden"><div id="joyKnob"></div></div>
+<div id="monHp" class="hidden"></div>
+<div id="itembar" class="hidden">
+  <div class="slot" data-slot="0"><span class="key">1</span><span id="itSword">🗡️</span></div>
+  <div class="slot" data-slot="1"><span class="key">2</span>⛏️</div>
+  <div class="slot" id="itTorch" data-slot="2"><span class="key">3</span>🔦</div>
+  <div class="slot" data-slot="3"><span class="key">4</span>💎<span class="cnt" id="itGems">0</span></div>
+  <div class="slot" data-slot="4"><span class="key">5</span>🍖<span class="cnt" id="itMeat">0</span></div>
+</div>
+<div id="toast" class="hidden"></div>
+<button id="atkBtn" class="hidden" title="Swing sword">⚔️</button>
+<button id="mineBtn" class="hidden" title="Mine rock">⛏️</button>
 <div id="lookHint" class="hidden">drag right side to look 👀</div>
 <button id="pauseBtn" class="hidden" title="Pause">⏸</button>
-<div id="ver">v2.5</div>
+<div id="ver">v4.6</div>
 
 <div class="overlay" id="deviceScreen">
   <h1>🎮 HOW ARE YOU PLAYING?</h1>
@@ -90,8 +168,27 @@
 <div class="overlay hidden" id="startScreen">
   <h1>🕯️ CAVE EXPLORER 3D</h1>
   <p>Explore the dark cave. Collect every glowing gem 💎, then escape through the portal 🟢.</p>
-  <button class="btn" id="startBtn">▶ ENTER THE CAVE</button>
-  <p class="hint">Desktop: WASD to move · <b>hold &amp; drag the mouse</b> to look around<br>Mobile: buttons to move · drag to look</p>
+  <div class="big" style="font-size:1.1rem">💎 <span id="gemBank">0</span> gems · 🍖 <span id="meatBank">0</span> meat</div>
+  <div class="shop-sec">DIFFICULTY</div>
+  <div id="diffRow" class="shop-row"></div>
+  <div class="shop-sec">CAVE</div>
+  <div id="caveRow" class="shop-row"></div>
+  <button class="btn" id="startBtn" style="margin-top:14px">▶ ENTER THE CAVE</button>
+  <button class="btn" id="shopBtn" style="margin-top:12px;background:rgba(255,255,255,0.15);color:#fff;box-shadow:none">🛒 SHOP</button>
+  <p class="hint">PC: WASD move · hold-drag mouse to look · <b>F</b> fight · <b>G</b> mine<br>Phone: joystick · drag to look · ⚔️ fight · ⛏️ mine</p>
+</div>
+
+<div class="overlay hidden" id="shopScreen">
+  <h1 style="font-size:clamp(1.6rem,6vw,2.6rem)">🛒 SHOP</h1>
+  <div class="big" style="font-size:1.2rem">💎 <span id="shopGems">0</span> gems · 🍖 <span id="shopMeat">0</span> meat</div>
+  <div class="shop-sec">TORCH COLOR</div>
+  <div id="torchRow" class="shop-row"></div>
+  <div class="shop-sec">UPGRADES</div>
+  <div id="upRow" class="shop-row"></div>
+  <div class="shop-sec">HELPERS — find gems &amp; fight the monster</div>
+  <div id="helpRow" class="shop-row"></div>
+  <p class="hint" id="shopMsg">Earn gems by escaping the cave.</p>
+  <button class="btn" id="shopBack" style="background:rgba(255,255,255,0.15);color:#fff;box-shadow:none">← BACK</button>
 </div>
 <div class="overlay hidden" id="loadScreen"><h1>Loading…</h1><p id="loadMsg">Preparing the cave</p></div>
 <div class="overlay hidden" id="winScreen">
@@ -101,6 +198,7 @@
   <button class="btn" id="againBtn">↻ NEW CAVE</button>
 </div>
 <div id="danger"></div>
+<div id="warning" class="hidden">⚠️ MONSTER NEAR ⚠️</div>
 <div id="jumpscare" class="hidden">
   <svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice">
     <defs>
@@ -181,6 +279,133 @@ function main() {
   const joy = { x: 0, y: 0 };           // virtual joystick vector (-1..1)
   try { best = Number(localStorage.getItem('cave3dBest')) || 0; } catch (e) { best = 0; }
 
+  // ---- difficulty ----
+  const DIFFS = {
+    easy:   { mon: 0.5, fog: 0.13, torch: 11, label: 'EASY',   c: '#5adf9e' },
+    normal: { mon: 0.7, fog: 0.18, torch: 9,  label: 'NORMAL', c: '#ffd84d' },
+    hard:   { mon: 1.15, fog: 0.24, torch: 7, label: 'HARD',   c: '#ff5a3b' }
+  };
+  let difficulty = 'normal';
+  try { difficulty = localStorage.getItem('cave3dDiff') || 'normal'; } catch (e) {}
+  if (!DIFFS[difficulty]) difficulty = 'normal';
+  let monSpeed = DIFFS[difficulty].mon;
+
+  // ---- cave environments ----
+  const CAVES = {
+    stone: { name: 'Stone', icon: '🪨', wall: 0x8a8a90, floor: 0x3a3a40, ceil: 0x24242c },
+    wood:  { name: 'Wood',  icon: '🪵', wall: 0x7a5632, floor: 0x4a3620, ceil: 0x2a1e12 },
+    coal:  { name: 'Coal',  icon: '⚫', wall: 0x2c2c30, floor: 0x141416, ceil: 0x0a0a0c }
+  };
+  let caveType = 'stone';
+  try { caveType = localStorage.getItem('cave3dCave') || 'stone'; } catch (e) {}
+  if (!CAVES[caveType]) caveType = 'stone';
+
+  // ---- shop / persistent progress ----
+  let playerSpeed = 3.3;
+  let shop;
+  try { shop = JSON.parse(localStorage.getItem('cave3dShop')) || {}; } catch (e) { shop = {}; }
+  shop = Object.assign({ gems: 0, meat: 0, helpers: 0, torch: 'warm', owned: ['warm'], bright: false, fast: false, sharp: false, mighty: false, pickaxe: false }, shop);
+  shop.pickaxe = true;   // the pickaxe is free — everyone starts with it
+  function saveShop() { try { localStorage.setItem('cave3dShop', JSON.stringify(shop)); } catch (e) {} }
+  let swordDmg = 1;
+  const TORCHES = [
+    { id: 'warm', name: 'Warm', color: 0xffb060, css: '#ffb060', cost: 0 },
+    { id: 'ice', name: 'Ice', color: 0x66aaff, css: '#66aaff', cost: 15 },
+    { id: 'toxic', name: 'Toxic', color: 0x66ff88, css: '#66ff88', cost: 15 },
+    { id: 'void', name: 'Void', color: 0xc060ff, css: '#c060ff', cost: 20 },
+    { id: 'white', name: 'Bright', color: 0xffffff, css: '#ffffff', cost: 25 }
+  ];
+  const UPGRADES = [
+    { id: 'bright', name: 'Brighter Torch', icon: '🔦', cost: 30 },
+    { id: 'fast', name: 'Faster Legs', icon: '🏃', cost: 30 },
+    { id: 'sharp', name: 'Sharp Sword', icon: '🗡️', cost: 40 },
+    { id: 'mighty', name: 'Mighty Sword', icon: '⚔️', cost: 80 }
+  ];
+  function applyShop() {
+    const tc = TORCHES.find(t => t.id === shop.torch) || TORCHES[0];
+    torch.color.setHex(tc.color);
+    torch.distance = DIFFS[difficulty].torch + (shop.bright ? 4 : 0);
+    playerSpeed = shop.fast ? 4.4 : 3.3;
+    swordDmg = shop.mighty ? 3 : shop.sharp ? 2 : 1;
+    updateViewmodels();
+    updateItembar();
+  }
+  function updateItembar() {
+    const tc = TORCHES.find(t => t.id === shop.torch) || TORCHES[0];
+    document.getElementById('itSword').textContent = shop.mighty ? '⚔️' : '🗡️';
+    document.getElementById('itTorch').style.borderColor = tc.css;
+    document.getElementById('itGems').textContent = shop.gems;
+    document.getElementById('itMeat').textContent = shop.meat || 0;
+  }
+  // ---- item bar selection (number keys 1-5 / click) ----
+  const SLOT_NAMES = ['Sword', 'Pickaxe', 'Torch', 'Gems', 'Meat'];
+  let selSlot = 0;
+  function selectSlot(i, silent) {
+    if (i < 0 || i > 4) return;
+    selSlot = i;
+    document.querySelectorAll('#itembar .slot').forEach(s => s.classList.toggle('sel', +s.dataset.slot === i));
+    updateViewmodels();
+    if (!silent) flashMsg('Selected: ' + SLOT_NAMES[i]);
+  }
+  // only the selected tool is held in your hand
+  function updateViewmodels() {
+    if (typeof sword === 'undefined' || typeof pickaxe === 'undefined') return;
+    sword.visible = selSlot === 0;
+    pickaxe.visible = selSlot === 1 && !!shop.pickaxe;
+  }
+  function cycleTorch() {
+    const own = TORCHES.filter(t => t.cost === 0 || shop.owned.includes(t.id));
+    if (own.length < 2) { flashMsg('🔦 Only one torch owned — buy more in the shop'); return; }
+    const i = own.findIndex(t => t.id === shop.torch);
+    const nx = own[(i + 1) % own.length];
+    shop.torch = nx.id; saveShop(); applyShop();
+    flashMsg('🔦 ' + nx.name + ' torch');
+  }
+  function useSlot() {
+    if (state !== 'playing') return;
+    if (selSlot === 0) attack();
+    else if (selSlot === 1) mine();
+    else if (selSlot === 2) cycleTorch();
+    else if (selSlot === 3) flashMsg('💎 You have ' + shop.gems + ' gems');
+    else flashMsg('🍖 You have ' + (shop.meat || 0) + ' meat');
+  }
+  function applyDifficulty() {
+    monSpeed = DIFFS[difficulty].mon;
+    scene.fog.density = DIFFS[difficulty].fog;
+    applyShop();
+  }
+  function renderDiff() {
+    const row = document.getElementById('diffRow'); if (!row) return;
+    row.innerHTML = '';
+    for (const id in DIFFS) {
+      const d = DIFFS[id], sel = difficulty === id;
+      const el = document.createElement('div');
+      el.className = 'shop-item' + (sel ? ' equipped' : '');
+      el.innerHTML = `<div class="nm" style="color:${d.c}">${d.label}</div>`;
+      el.onclick = () => { difficulty = id; try { localStorage.setItem('cave3dDiff', id); } catch (e) {} applyDifficulty(); renderDiff(); };
+      row.appendChild(el);
+    }
+  }
+  function applyCave() {
+    const c = CAVES[caveType] || CAVES.stone;
+    rockMat.color.setHex(c.wall);
+    floorMat.color.setHex(c.floor);
+    ceilMat.color.setHex(c.ceil);
+  }
+  function renderCaves() {
+    const row = document.getElementById('caveRow'); if (!row) return;
+    row.innerHTML = '';
+    for (const id in CAVES) {
+      const c = CAVES[id], sel = caveType === id;
+      const el = document.createElement('div');
+      el.className = 'shop-item' + (sel ? ' equipped' : '');
+      const hex = '#' + c.wall.toString(16).padStart(6, '0');
+      el.innerHTML = `<div class="sw" style="background:${hex};color:${hex}"></div><div class="nm">${c.icon} ${c.name}</div>`;
+      el.onclick = () => { caveType = id; try { localStorage.setItem('cave3dCave', id); } catch (e) {} applyCave(); renderCaves(); };
+      row.appendChild(el);
+    }
+  }
+
   // ---- the scary monster (a looming wraith) ----
   const monster = new THREE.Group();
   const wraithMat = new THREE.MeshStandardMaterial({ color: 0x0c0409, emissive: 0x1a0008, roughness: 1, transparent: true, opacity: 0.92 });
@@ -201,8 +426,57 @@ function main() {
   monLight.position.y = 1.1; monster.add(monLight);
   monster.visible = false;
   scene.add(monster);
-  let monX = 0, monZ = 0, flow = null, flowCell = null, hbTimer = 0, whisperTimer = 0;
-  const MON_SPEED = 2.1;    // 0.70× the normal walk speed (still lunges when you look away)
+  let monX = 0, monZ = 0, flow = null, flowCell = null, hbTimer = 0, whisperTimer = 0, monsterActive = false;
+  let monHP = 3, monMaxHP = 3, respawnT = 0, monFlash = 0;   // combat state
+  // monster speed is set per difficulty (see monSpeed)
+
+  // ---- sword (first-person weapon) ----
+  const sword = new THREE.Group();
+  const bladeMat = new THREE.MeshStandardMaterial({ color: 0xd2dae2, metalness: 0.9, roughness: 0.22, emissive: 0x223344, emissiveIntensity: 0.25 });
+  const blade = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.62, 0.1), bladeMat); blade.position.y = 0.42; sword.add(blade);
+  const tip = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.16, 4), bladeMat); tip.position.y = 0.8; sword.add(tip);
+  const guard = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.05, 0.13), new THREE.MeshStandardMaterial({ color: 0x9a7a2a, metalness: 0.6, roughness: 0.5 })); guard.position.y = 0.09; sword.add(guard);
+  const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.2, 8), new THREE.MeshStandardMaterial({ color: 0x3a2a18 })); grip.position.y = -0.03; sword.add(grip);
+  sword.position.set(0.42, -0.44, -0.9);
+  sword.rotation.set(0.2, -0.3, 0.35);
+  camera.add(sword); scene.add(camera);
+  let swingT = 0, swingCd = 0, hitDone = false;
+  function attack() {
+    if (state !== 'playing' || swingCd > 0) return;
+    selectSlot(0, true);                       // draw the sword
+    swingT = 0.32; swingCd = 0.42; hitDone = false;
+    sfxSwing();
+  }
+
+  // ---- pickaxe (mine rock, shop-unlocked) ----
+  const pickaxe = new THREE.Group();
+  const paHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.62, 8), new THREE.MeshStandardMaterial({ color: 0x5a3a1a })); paHandle.position.y = 0.18; pickaxe.add(paHandle);
+  const paHead = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.09, 0.09), new THREE.MeshStandardMaterial({ color: 0x8892a0, metalness: 0.7, roughness: 0.4 })); paHead.position.y = 0.5; paHead.rotation.z = 0.15; pickaxe.add(paHead);
+  pickaxe.position.set(-0.46, -0.5, -0.9);
+  pickaxe.rotation.set(0.3, 0.4, -0.35);
+  pickaxe.visible = false;
+  camera.add(pickaxe);
+  let mineT = 0, mineCd = 0, mineDone = false;
+  function mine() {
+    if (state !== 'playing' || !shop.pickaxe || mineCd > 0) return;
+    selectSlot(1, true);                       // pull out the pickaxe
+    mineT = 0.3; mineCd = 0.5; mineDone = false; sfxMine();
+  }
+  function breakWall() {
+    const ax = posX + (-Math.sin(yaw)) * 1.15, az = posZ + (-Math.cos(yaw)) * 1.15;
+    const cx = Math.round(ax), cy = Math.round(az);
+    if (cx > 0 && cy > 0 && cx < MAPW - 1 && cy < MAPH - 1 && map[cy][cx] === 1) {
+      map[cy][cx] = 0; buildWalls();
+      if (Math.random() < 0.58) { shop.gems++; saveShop(); flashMsg('💎 A gem in the rock! +1'); }
+      else flashMsg('⛏️ Rock broken');
+    } else flashMsg('⛏️ No rock to mine');
+  }
+  let toastTimer = 0;
+  function flashMsg(txt) {
+    const t = document.getElementById('toast');
+    t.textContent = txt; t.classList.remove('hidden');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.add('hidden'), 1500);
+  }
 
   // ---- procedural horror audio ----
   let actx = null, masterGain, droneGain, drone1, drone2;
@@ -248,12 +522,78 @@ function main() {
     o.connect(g).connect(masterGain); n.connect(ng).connect(masterGain);
     o.start(t); o.stop(t + 0.75); n.start(t);
   }
+  function sfxSwing() {
+    if (!actx) return;
+    const t = actx.currentTime, dur = 0.2;
+    const buf = actx.createBuffer(1, (actx.sampleRate * dur) | 0, actx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1);
+    const n = actx.createBufferSource(); n.buffer = buf;
+    const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.setValueAtTime(700, t); bp.frequency.exponentialRampToValueAtTime(2600, t + dur); bp.Q.value = 4;
+    const g = actx.createGain(); g.gain.setValueAtTime(0.35, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    n.connect(bp).connect(g).connect(masterGain); n.start(t);
+  }
+  function sfxHit() {
+    if (!actx) return;
+    const t = actx.currentTime;
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'square'; o.frequency.setValueAtTime(180, t); o.frequency.exponentialRampToValueAtTime(60, t + 0.12);
+    g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+    o.connect(g).connect(masterGain); o.start(t); o.stop(t + 0.16);
+  }
+  function sfxMine() {
+    if (!actx) return;
+    const t = actx.currentTime;
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'triangle'; o.frequency.setValueAtTime(520, t); o.frequency.exponentialRampToValueAtTime(180, t + 0.1);
+    g.gain.setValueAtTime(0.4, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+    o.connect(g).connect(masterGain); o.start(t); o.stop(t + 0.16);
+  }
+  function sfxSlain() {
+    if (!actx) return;
+    const t = actx.currentTime;
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(300, t); o.frequency.exponentialRampToValueAtTime(40, t + 0.5);
+    g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+    o.connect(g).connect(masterGain); o.start(t); o.stop(t + 0.6);
+  }
 
   // floor & ceiling
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(MAPW * 2, MAPH * 2), floorMat);
   floor.rotation.x = -Math.PI / 2; floor.position.set(MAPW / 2, 0, MAPH / 2); scene.add(floor);
   const ceil = new THREE.Mesh(new THREE.PlaneGeometry(MAPW * 2, MAPH * 2), ceilMat);
   ceil.rotation.x = Math.PI / 2; ceil.position.set(MAPW / 2, 1, MAPH / 2); scene.add(ceil);
+
+  // ---- cobwebs hanging from the ceiling ----
+  const webMat = new THREE.LineBasicMaterial({ color: 0xdddddd, transparent: true, opacity: 0.38 });
+  let webGroup = null;
+  function makeWebGeo() {
+    const pts = [], SP = 7, RINGS = 3, R = 0.34;
+    const ang = [];
+    for (let i = 0; i < SP; i++) ang.push(i / SP * Math.PI * 2 + (Math.random() - 0.5) * 0.35);
+    for (const a of ang) pts.push(0, 0, 0, Math.cos(a) * R, 0, Math.sin(a) * R);   // spokes
+    for (let r = 1; r <= RINGS; r++) {                                             // rings
+      const rr = R * (r / RINGS) * (0.82 + Math.random() * 0.22);
+      for (let i = 0; i < SP; i++) {
+        const a1 = ang[i], a2 = ang[(i + 1) % SP];
+        pts.push(Math.cos(a1) * rr, 0, Math.sin(a1) * rr, Math.cos(a2) * rr, 0, Math.sin(a2) * rr);
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+    return g;
+  }
+  function spawnWebs() {
+    if (webGroup) scene.remove(webGroup);
+    webGroup = new THREE.Group(); scene.add(webGroup);
+    const cells = openCells();
+    for (let i = 0; i < 12 && cells.length; i++) {
+      const c = cells.splice((Math.random() * cells.length) | 0, 1)[0];
+      const web = new THREE.LineSegments(makeWebGeo(), webMat);
+      web.position.set(c[0] + (Math.random() * 0.4 - 0.2), 0.96 - Math.random() * 0.04, c[1] + (Math.random() * 0.4 - 0.2));
+      web.rotation.set((Math.random() - 0.5) * 0.35, Math.random() * Math.PI, (Math.random() - 0.5) * 0.35);
+      webGroup.add(web);
+    }
+  }
 
   function genMaze() {
     map = Array.from({ length: MAPH }, () => Array(MAPW).fill(1));
@@ -294,25 +634,40 @@ function main() {
     return c;
   }
 
-  // BFS distance field from the player's cell → the monster follows it downhill to hunt you
-  function computeFlow(tx, ty) {
-    flow = Array.from({ length: MAPH }, () => Array(MAPW).fill(-1));
-    if (map[ty][tx]) return;
-    flow[ty][tx] = 0;
+  // BFS distance field toward a target cell — walked downhill by the monster and the helpers
+  function bfsFrom(tx, ty) {
+    const f = Array.from({ length: MAPH }, () => Array(MAPW).fill(-1));
+    if (map[ty] === undefined || map[ty][tx]) return f;
+    f[ty][tx] = 0;
     const q = [[tx, ty]];
     while (q.length) {
       const [x, y] = q.shift();
       for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
         const nx = x + dx, ny = y + dy;
-        if (nx >= 0 && ny >= 0 && nx < MAPW && ny < MAPH && !map[ny][nx] && flow[ny][nx] < 0) {
-          flow[ny][nx] = flow[y][x] + 1; q.push([nx, ny]);
+        if (nx >= 0 && ny >= 0 && nx < MAPW && ny < MAPH && !map[ny][nx] && f[ny][nx] < 0) {
+          f[ny][nx] = f[y][x] + 1; q.push([nx, ny]);
         }
       }
     }
+    return f;
+  }
+  function computeFlow(tx, ty) { flow = bfsFrom(tx, ty); }
+
+  // ---- helpers: friendly wisps hired in the shop — they fetch gems and fight the monster ----
+  let helperGroup = null, helpers = [];
+  function makeHelper() {
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.SphereGeometry(0.19, 12, 10),
+      new THREE.MeshStandardMaterial({ color: 0x9fffe0, emissive: 0x27d8a0, emissiveIntensity: 1.9, roughness: .35 }));
+    body.position.y = 0.34; g.add(body);
+    const eyeG = new THREE.SphereGeometry(0.032, 8, 6), eyeM = new THREE.MeshBasicMaterial({ color: 0x06251c });
+    const e1 = new THREE.Mesh(eyeG, eyeM); e1.position.set(-0.055, 0.38, -0.135); g.add(e1);
+    const e2 = new THREE.Mesh(eyeG, eyeM); e2.position.set(0.055, 0.38, -0.135); g.add(e2);
+    return g;
   }
 
   function setupLevel() {
-    genMaze(); buildWalls();
+    genMaze(); buildWalls(); spawnWebs();
     posX = 1; posZ = 1; yaw = 0; pitch = 0;
     const cells = openCells().filter(([x, y]) => Math.hypot(x - 1, y - 1) > 3);
     let far = cells[0] || [MAPW - 2, MAPH - 2], fd = 0;
@@ -339,12 +694,25 @@ function main() {
     exitMesh.visible = false; scene.add(exitMesh);
     collected = 0; exitOpen = false;
     document.getElementById('gems').textContent = '0 / ' + totalGems;
-    // spawn the monster at the farthest cell from the player so it starts hunting from afar
-    const mc = far;
-    monX = mc[0]; monZ = mc[1];
-    monster.position.set(monX, 0, monZ); monster.visible = true;
+    // the monster stays hidden until every gem is collected
+    monsterActive = false;
+    monX = far[0]; monZ = far[1];
+    monster.position.set(monX, 0, monZ); monster.visible = false;
     flow = null; flowCell = null;
+    monHP = monMaxHP; respawnT = 0; monFlash = 0;
+    // hired helpers spawn beside you
+    if (helperGroup) scene.remove(helperGroup);
+    helperGroup = new THREE.Group(); scene.add(helperGroup);
+    helpers = [];
+    for (let i = 0; i < (shop.helpers || 0); i++) {
+      const mesh = makeHelper();
+      const hx = 1 + (Math.random() * 0.4 - 0.2), hz = 1 + (Math.random() * 0.4 - 0.2);
+      mesh.position.set(hx, 0, hz);
+      helperGroup.add(mesh);
+      helpers.push({ x: hx, z: hz, mesh, flow: null, key: '', atkCd: 0 });
+    }
     document.getElementById('danger').style.opacity = 0;
+    document.getElementById('warning').classList.add('hidden');
   }
 
   function canWalk(x, z) {
@@ -361,7 +729,7 @@ function main() {
   }
 
   function update(dt) {
-    const mv = 3.3 * dt, rot = 2.4 * dt;   // 1.10× the normal walk speed
+    const mv = playerSpeed * dt, rot = 2.4 * dt;
     if (keys.tl) yaw += rot;
     if (keys.tr) yaw -= rot;
     let fx = 0, fz = 0;
@@ -390,7 +758,8 @@ function main() {
     for (const g of gems) if (!g.got) { g.mesh.rotation.y += dt * 2; g.mesh.position.y = 0.5 + Math.sin(performance.now() / 400 + g.x) * 0.06; }
     if (exitOpen) { exitMesh.rotation.y += dt * 1.5; exitMesh.rotation.z += dt * 0.8; }
 
-    // ---- monster: hunt the player along the BFS flow field ----
+    // ---- monster: only hunts once every gem is collected ----
+    if (monsterActive) {
     const pcx = Math.round(posX), pcy = Math.round(posZ);
     if (!flowCell || flowCell[0] !== pcx || flowCell[1] !== pcy) { computeFlow(pcx, pcy); flowCell = [pcx, pcy]; }
     const mcx = Math.round(monX), mcy = Math.round(monZ);
@@ -407,7 +776,7 @@ function main() {
     const fwdX = -Math.sin(yaw), fwdZ = -Math.cos(yaw);
     const dot = fwdX * (monX - posX) / md + fwdZ * (monZ - posZ) / md;
     const watched = md < 9 && dot > 0.55;
-    const spd = MON_SPEED * (watched ? 0.3 : 2.2) * dt;
+    const spd = monSpeed * dt;   // constant speed (set by difficulty)
     // move toward the target cell centre
     const tdx = tcx - monX, tdz = tcy - monZ, td = Math.hypot(tdx, tdz);
     if (td > 0.02) { monX += tdx / td * Math.min(spd, td); monZ += tdz / td * Math.min(spd, td); }
@@ -421,6 +790,7 @@ function main() {
     // proximity: danger glow, audio, camera shake
     const near = Math.max(0, Math.min(1, (8 - md) / 8));   // 0 far → 1 on top of you
     document.getElementById('danger').style.opacity = (near * near * 0.95).toFixed(3);
+    document.getElementById('warning').classList.toggle('hidden', md > 5.5);   // flash when it's close
     if (droneGain) { droneGain.gain.value = near * 0.28; if (drone2) drone2.frequency.value = 51.7 + near * 6; }
     // heartbeat quickens as it closes in
     if (md < 9) { hbTimer -= dt; if (hbTimer <= 0) { heartbeat(); hbTimer = 0.3 + (md / 9) * 0.95; } }
@@ -435,17 +805,155 @@ function main() {
       camera.rotation.set(pitch + (Math.random() - 0.5) * sh, yaw + (Math.random() - 0.5) * sh, (Math.random() - 0.5) * sh);
     }
     if (md < 0.6) return caught();
+    }  // end monster block
+
+    // ---- helpers: fetch gems for you, defend you from the monster ----
+    for (const h of helpers) {
+      h.atkCd = Math.max(0, h.atkCd - dt);
+      // pick a target: the monster if it's active & close, else the nearest gem, else stay by you
+      let tx = posX, tz = posZ, mode = 'follow';
+      if (monsterActive && Math.hypot(monX - h.x, monZ - h.z) < 5) { tx = monX; tz = monZ; mode = 'fight'; }
+      else {
+        let ng = null, nd = Infinity;
+        for (const g of gems) if (!g.got) { const d = (g.x - h.x) ** 2 + (g.z - h.z) ** 2; if (d < nd) { nd = d; ng = g; } }
+        if (ng) { tx = ng.x; tz = ng.z; mode = 'gem'; }
+      }
+      const tKey = Math.round(tx) + ',' + Math.round(tz);
+      if (h.key !== tKey) { h.flow = bfsFrom(Math.round(tx), Math.round(tz)); h.key = tKey; }
+      // walk downhill on the flow field, through the corridors
+      const hcx = Math.round(h.x), hcy = Math.round(h.z);
+      let bx = hcx, by = hcy, best = h.flow && h.flow[hcy] ? h.flow[hcy][hcx] : Infinity;
+      if (best < 0 || best === undefined) best = Infinity;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = hcx + dx, ny = hcy + dy;
+        if (nx >= 0 && ny >= 0 && nx < MAPW && ny < MAPH && h.flow && h.flow[ny][nx] >= 0 && h.flow[ny][nx] < best) { best = h.flow[ny][nx]; bx = nx; by = ny; }
+      }
+      const distT = Math.hypot(tx - h.x, tz - h.z);
+      const stop = mode === 'follow' ? 1.1 : mode === 'fight' ? 0.7 : 0.05;
+      if (distT > stop) {
+        let mvx, mvz;
+        if (best <= 1 || distT < 1.2) { mvx = tx - h.x; mvz = tz - h.z; }   // target in sight → straight line
+        else { mvx = bx - h.x; mvz = by - h.z; }                            // else follow the maze
+        const l = Math.hypot(mvx, mvz) || 1, spd = 2.6 * dt;
+        h.x += mvx / l * Math.min(spd, l); h.z += mvz / l * Math.min(spd, l);
+      }
+      // grab gems it reaches
+      for (const g of gems) if (!g.got && Math.hypot(g.x - h.x, g.z - h.z) < 0.45) collectGem(g, true);
+      // fight the monster
+      if (mode === 'fight' && monsterActive && Math.hypot(monX - h.x, monZ - h.z) < 0.9 && h.atkCd <= 0) {
+        h.atkCd = 0.9; monHP -= 1; monFlash = 0.16; sfxHit();
+        if (monHP <= 0) slayMonster();
+      }
+      h.mesh.position.set(h.x, 0.05 + Math.sin(performance.now() / 300 + h.x * 7) * 0.05, h.z);
+      h.mesh.rotation.y = Math.atan2(tx - h.x, tz - h.z);
+    }
 
     // pickups
-    for (const g of gems) if (!g.got && Math.hypot(g.x - posX, g.z - posZ) < 0.45) {
-      g.got = true; g.mesh.visible = false; collected++;
-      document.getElementById('gems').textContent = collected + ' / ' + totalGems;
-      if (collected >= totalGems) { exitOpen = true; exitMesh.visible = true; }
-    }
+    for (const g of gems) if (!g.got && Math.hypot(g.x - posX, g.z - posZ) < 0.45) collectGem(g, false);
     if (exitOpen && Math.hypot(exitCell[0] - posX, exitCell[1] - posZ) < 0.5) win();
+
+    // direction arrows (relative to where you're facing): blue→nearest gem, green→portal, red→monster
+    const sY = Math.sin(yaw), cY = Math.cos(yaw);
+    const aim = (el, tx, tz) => {
+      const dx = tx - posX, dz = tz - posZ;
+      const f = dx * -sY + dz * -cY, r = dx * cY + dz * -sY;
+      el.querySelector('.ptr').style.transform = `rotate(${Math.atan2(r, f)}rad)`;
+    };
+    let ng = null, nd = Infinity;
+    for (const g of gems) if (!g.got) { const d = (g.x - posX) ** 2 + (g.z - posZ) ** 2; if (d < nd) { nd = d; ng = g; } }
+    const gemInd = document.getElementById('gemInd');
+    if (ng) { gemInd.style.display = ''; aim(gemInd, ng.x, ng.z); } else gemInd.style.display = 'none';
+    const exitInd = document.getElementById('exitInd');
+    if (exitOpen) { exitInd.style.display = ''; aim(exitInd, exitCell[0], exitCell[1]); } else exitInd.style.display = 'none';
+    const helpInd = document.getElementById('helpInd');
+    if (helpers.length) {
+      let nh = helpers[0], hd = Infinity;
+      for (const h of helpers) { const d = (h.x - posX) ** 2 + (h.z - posZ) ** 2; if (d < hd) { hd = d; nh = h; } }
+      helpInd.style.display = ''; aim(helpInd, nh.x, nh.z);
+    } else helpInd.style.display = 'none';
+    const monInd = document.getElementById('monInd');
+    if (monsterActive) { monInd.style.display = ''; aim(monInd, monX, monZ); } else monInd.style.display = 'none';
+
+    // ---- sword swing + combat ----
+    if (swingCd > 0) swingCd -= dt;
+    if (swingT > 0) {
+      swingT -= dt;
+      const p = 1 - Math.max(0, swingT) / 0.32, s = Math.sin(p * Math.PI);
+      sword.rotation.set(0.2 + s * 0.6, -0.3, 0.35 - s * 1.6);
+      sword.position.set(0.42 - s * 0.14, -0.44 + s * 0.12, -0.9 + s * 0.06);
+      if (!hitDone && p > 0.4) {
+        hitDone = true;
+        if (monsterActive) {
+          const mdx = monX - posX, mdz = monZ - posZ, mdd = Math.hypot(mdx, mdz) || 0.001;
+          const f = (-sY) * mdx / mdd + (-cY) * mdz / mdd;   // how much it's in front of you
+          if (mdd < 2.4 && f > -0.15) hitMonster(mdx / mdd, mdz / mdd);   // generous reach & arc
+        }
+      }
+    } else {
+      const b = Math.sin(performance.now() / 500) * 0.02;
+      sword.rotation.set(0.2, -0.3, 0.35); sword.position.set(0.42, -0.44 + b, -0.9);
+    }
+    // ---- pickaxe swing (mining) ----
+    if (mineCd > 0) mineCd -= dt;
+    if (mineT > 0) {
+      mineT -= dt;
+      const p = 1 - Math.max(0, mineT) / 0.3, s = Math.sin(p * Math.PI);
+      pickaxe.rotation.set(0.3 + s * 1.0, 0.4, -0.35);
+      pickaxe.position.set(-0.46, -0.5 + s * 0.06, -0.9 + s * 0.06);
+      if (!mineDone && p > 0.5) { mineDone = true; breakWall(); }
+    } else if (shop.pickaxe) {
+      const b = Math.sin(performance.now() / 600) * 0.02;
+      pickaxe.rotation.set(0.3, 0.4, -0.35); pickaxe.position.set(-0.46, -0.5 + b, -0.9);
+    }
+    if (monFlash > 0) monFlash -= dt;
+    wraithMat.emissive.setHex(monFlash > 0 ? 0xff3300 : 0x1a0008);
+    if (respawnT > 0) { respawnT -= dt; if (respawnT <= 0) respawnMonster(); }
+    // monster HP pips
+    const hpEl = document.getElementById('monHp');
+    if (monsterActive) { hpEl.classList.remove('hidden'); hpEl.textContent = '👹 ' + '♥'.repeat(Math.max(0, monHP)); }
+    else hpEl.classList.add('hidden');
 
     elapsed = (performance.now() - startT) / 1000;
     document.getElementById('time').textContent = elapsed.toFixed(1) + 's';
+  }
+  function collectGem(g, byHelper) {
+    g.got = true; g.mesh.visible = false; collected++;
+    document.getElementById('gems').textContent = collected + ' / ' + totalGems;
+    if (byHelper) flashMsg('🤖 A helper found a gem!  ' + collected + ' / ' + totalGems);
+    if (collected >= totalGems) {
+      exitOpen = true; exitMesh.visible = true;
+      // ALL GEMS COLLECTED → the monster awakens and appears, far away, to hunt you
+      monsterActive = true; monster.visible = true;
+      const cells = openCells();
+      let far = cells[0] || [monX, monZ], fd = 0;
+      for (const c of cells) { const d = Math.hypot(c[0] - posX, c[1] - posZ); if (d > fd) { fd = d; far = c; } }
+      monX = far[0]; monZ = far[1]; monster.position.set(monX, 0, monZ);
+      flow = null; flowCell = null; hbTimer = 0.4;
+      monHP = monMaxHP; respawnT = 0;
+    }
+  }
+  function hitMonster(nx, nz) {
+    monHP -= swordDmg; monFlash = 0.16; sfxHit();
+    const kx = monX + nx * 0.7, kz = monZ + nz * 0.7;
+    const cxr = Math.round(kx), czr = Math.round(kz);
+    if (map[czr] && map[czr][cxr] === 0) { monX = kx; monZ = kz; }
+    if (monHP <= 0) slayMonster();
+  }
+  function slayMonster() {
+    monsterActive = false; monster.visible = false; respawnT = 5; sfxSlain();
+    shop.gems += 2; shop.meat = (shop.meat || 0) + 5; saveShop();
+    document.getElementById('danger').style.opacity = 0;
+    const w = document.getElementById('warning');
+    w.textContent = '⚔️ MONSTER SLAIN!  +2 💎  +5 🍖'; w.classList.remove('hidden');
+    setTimeout(() => { if (!monsterActive) { w.classList.add('hidden'); w.textContent = '⚠️ MONSTER NEAR ⚠️'; } }, 1600);
+  }
+  function respawnMonster() {
+    const cells = openCells();
+    let far = cells[0] || [monX, monZ], fd = 0;
+    for (const c of cells) { const d = Math.hypot(c[0] - posX, c[1] - posZ); if (d > fd) { fd = d; far = c; } }
+    monX = far[0]; monZ = far[1]; monster.position.set(monX, 0, monZ);
+    monHP = monMaxHP; monsterActive = true; monster.visible = true; flow = null; flowCell = null;
+    document.getElementById('warning').textContent = '⚠️ MONSTER NEAR ⚠️';
   }
 
   let lastT = 0;
@@ -455,6 +963,16 @@ function main() {
     // torch flicker
     torch.intensity = 2.0 + Math.sin(t / 90) * 0.25 + Math.random() * 0.15;
     if (state === 'playing') update(dt);
+    const dev = state === 'playing' && inputMode === 'device';
+    document.getElementById('atkBtn').classList.toggle('hidden', !dev);
+    document.getElementById('mineBtn').classList.toggle('hidden', !(dev && shop.pickaxe));
+    const ib = document.getElementById('itembar');
+    ib.classList.toggle('hidden', state !== 'playing');
+    if (state === 'playing') {
+      document.getElementById('itGems').textContent = shop.gems;
+      document.getElementById('itMeat').textContent = shop.meat || 0;
+    }
+    if (state !== 'playing') document.getElementById('monHp').classList.add('hidden');
     renderer.render(scene, camera);
   }
 
@@ -469,8 +987,65 @@ function main() {
     joy.x = 0; joy.y = 0;
     const kb = document.getElementById('joyKnob'); if (kb) kb.style.transform = '';
   }
+  // ---- shop ----
+  function renderShop() {
+    document.getElementById('shopGems').textContent = shop.gems;
+    document.getElementById('shopMeat').textContent = shop.meat || 0;
+    const hr = document.getElementById('helpRow'); hr.innerHTML = '';
+    for (let i = 0; i < 3; i++) {
+      const owned = (shop.helpers || 0) > i;
+      const el = document.createElement('div');
+      el.className = 'shop-item' + (owned ? ' owned' : '');
+      el.innerHTML = `<div class="nm">🤖 Helper ${i + 1}</div><div class="pr">${owned ? '✓ hired' : '5 🍖'}</div>`;
+      el.onclick = () => buyHelper();
+      hr.appendChild(el);
+    }
+    const tr = document.getElementById('torchRow'); tr.innerHTML = '';
+    TORCHES.forEach(t => {
+      const owned = t.cost === 0 || shop.owned.includes(t.id), eq = shop.torch === t.id;
+      const el = document.createElement('div');
+      el.className = 'shop-item' + (eq ? ' equipped' : owned ? ' owned' : '');
+      el.innerHTML = `<div class="sw" style="background:${t.css};color:${t.css}"></div><div class="nm">${t.name}</div><div class="pr">${eq ? '✓ on' : owned ? 'owned' : t.cost + ' 💎'}</div>`;
+      el.onclick = () => buyTorch(t);
+      tr.appendChild(el);
+    });
+    const ur = document.getElementById('upRow'); ur.innerHTML = '';
+    UPGRADES.forEach(u => {
+      const owned = shop[u.id];
+      const el = document.createElement('div');
+      el.className = 'shop-item' + (owned ? ' owned' : '');
+      el.innerHTML = `<div class="nm">${u.icon} ${u.name}</div><div class="pr">${owned ? '✓ owned' : u.cost + ' 💎'}</div>`;
+      el.onclick = () => buyUpgrade(u);
+      ur.appendChild(el);
+    });
+  }
+  function buyTorch(t) {
+    const owned = t.cost === 0 || shop.owned.includes(t.id);
+    if (owned) shop.torch = t.id;
+    else if (shop.gems >= t.cost) { shop.gems -= t.cost; shop.owned.push(t.id); shop.torch = t.id; document.getElementById('shopMsg').textContent = 'Bought ' + t.name + '!'; }
+    else { document.getElementById('shopMsg').textContent = 'Not enough gems for ' + t.name + '.'; return; }
+    saveShop(); applyShop(); renderShop();
+  }
+  function buyUpgrade(u) {
+    if (shop[u.id]) return;
+    if (shop.gems >= u.cost) { shop.gems -= u.cost; shop[u.id] = true; document.getElementById('shopMsg').textContent = 'Bought ' + u.name + '!'; saveShop(); applyShop(); renderShop(); }
+    else document.getElementById('shopMsg').textContent = 'Not enough gems for ' + u.name + '.';
+  }
+  function buyHelper() {
+    if ((shop.helpers || 0) >= 3) { document.getElementById('shopMsg').textContent = 'You already have all 3 helpers!'; return; }
+    if ((shop.meat || 0) >= 5) {
+      shop.meat -= 5; shop.helpers = (shop.helpers || 0) + 1;
+      document.getElementById('shopMsg').textContent = 'Helper hired! It joins you in the next cave.';
+      saveShop(); renderShop();
+    } else document.getElementById('shopMsg').textContent = 'Not enough meat — defeat the monster to earn 5 🍖.';
+  }
+  function openShop() { renderShop(); document.getElementById('startScreen').classList.add('hidden'); document.getElementById('shopScreen').classList.remove('hidden'); }
+  function closeShop() { document.getElementById('shopScreen').classList.add('hidden'); document.getElementById('startScreen').classList.remove('hidden'); document.getElementById('gemBank').textContent = shop.gems; document.getElementById('meatBank').textContent = shop.meat || 0; }
+
   function startGame() {
     initAudio();
+    applyDifficulty();
+    applyCave();
     setupLevel();
     hbTimer = 0;
     state = 'playing'; startT = performance.now();
@@ -481,6 +1056,7 @@ function main() {
     document.getElementById('jumpscare').classList.add('hidden');
     document.getElementById('pauseBtn').classList.remove('hidden');
     camera.position.set(posX, 0.5, posZ);
+    if (helpers.length) flashMsg('🤖 ' + helpers.length + ' helper' + (helpers.length > 1 ? 's' : '') + ' joined you! Follow the yellow arrow.');
   }
   function caught() {
     state = 'caught'; clearKeys();
@@ -516,8 +1092,11 @@ function main() {
     monster.visible = false;
     if (droneGain) droneGain.gain.value = 0;
     document.getElementById('danger').style.opacity = 0;
+    document.getElementById('warning').classList.add('hidden');
     document.getElementById('pauseScreen').classList.add('hidden');
     document.getElementById('pauseBtn').classList.add('hidden');
+    document.getElementById('gemBank').textContent = shop.gems;
+    document.getElementById('meatBank').textContent = shop.meat || 0;
     document.getElementById('startScreen').classList.remove('hidden');
   }
   function win() {
@@ -525,10 +1104,14 @@ function main() {
     if (droneGain) droneGain.gain.value = 0;
     document.getElementById('pauseBtn').classList.add('hidden');
     document.getElementById('danger').style.opacity = 0;
+    document.getElementById('warning').classList.add('hidden');
+    // bank the gems you collected (+ a small speed-run bonus)
+    const earned = totalGems + (elapsed < 60 ? 3 : 0);
+    shop.gems += earned; saveShop();
     const isBest = best === 0 || elapsed < best;
     if (isBest) { best = elapsed; try { localStorage.setItem('cave3dBest', best); } catch (e) {} }
     document.getElementById('winTime').textContent = 'Time: ' + elapsed.toFixed(1) + 's';
-    document.getElementById('winMsg').textContent = isBest ? '🏆 New best time!' : 'Best: ' + best.toFixed(1) + 's';
+    document.getElementById('winMsg').textContent = '💎 +' + earned + ' gems earned!  ' + (isBest ? '🏆 New best!' : 'Best: ' + best.toFixed(1) + 's');
     document.getElementById('winScreen').classList.remove('hidden');
   }
   document.getElementById('startBtn').onclick = startGame;
@@ -537,16 +1120,40 @@ function main() {
   document.getElementById('mainBtn').onclick = goMain;
   document.getElementById('pauseBtn').onclick = togglePause;
   document.getElementById('caughtBtn').onclick = startGame;
+  document.getElementById('shopBtn').onclick = openShop;
+  document.getElementById('shopBack').onclick = closeShop;
+  const atk = document.getElementById('atkBtn');
+  atk.addEventListener('touchstart', e => { e.preventDefault(); attack(); }, { passive: false });
+  atk.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); attack(); });
+  const mineB = document.getElementById('mineBtn');
+  mineB.addEventListener('touchstart', e => { e.preventDefault(); mine(); }, { passive: false });
+  mineB.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); mine(); });
+  document.getElementById('gemBank').textContent = shop.gems;
+  document.getElementById('meatBank').textContent = shop.meat || 0;
+  document.querySelectorAll('#itembar .slot').forEach(s => {
+    s.addEventListener('click', () => selectSlot(+s.dataset.slot));
+    s.addEventListener('touchstart', e => { e.preventDefault(); selectSlot(+s.dataset.slot); }, { passive: false });
+  });
+  selectSlot(0, true);
+  renderDiff();
+  renderCaves();
+  applyDifficulty();
+  applyCave();
 
   // ---- keyboard ----
   const kmap = { w: 'fwd', arrowup: 'fwd', s: 'back', arrowdown: 'back',
     a: 'sl', arrowleft: 'tl', d: 'sr', arrowright: 'tr', q: 'sl', e: 'sr' };
   addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
-    if (kmap[k]) { keys[kmap[k]] = true; e.preventDefault(); }
-    if ((k === 'p' || k === 'escape') && (state === 'playing' || state === 'paused')) togglePause();
+    if (inputMode === 'pc') {                          // keyboard only in PC mode
+      if (kmap[k]) { keys[kmap[k]] = true; e.preventDefault(); }
+      if (k >= '1' && k <= '5') { e.preventDefault(); selectSlot(+k - 1); }
+      if (k === 'f' || k === ' ') { e.preventDefault(); useSlot(); }
+      if (k === 'g') { e.preventDefault(); mine(); }
+    }
+    if (inputMode === 'pc' && (k === 'p' || k === 'escape') && (state === 'playing' || state === 'paused')) togglePause();
   });
-  addEventListener('keyup', e => { const k = e.key.toLowerCase(); if (kmap[k]) keys[kmap[k]] = false; });
+  addEventListener('keyup', e => { const k = e.key.toLowerCase(); if (inputMode === 'pc' && kmap[k]) keys[kmap[k]] = false; });
 
   // ---- mouse look: hold the mouse button and drag to turn around ----
   let dragging = false;
