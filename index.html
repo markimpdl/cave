@@ -26,8 +26,12 @@
     text-shadow: 0 2px 6px #000; pointer-events: none; font-size: clamp(1rem,2.6vw,1.4rem); z-index: 5; }
   #hud .label { font-size: .58em; opacity: .7; display: block; }
   .overlay { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; text-align: center; padding: 24px;
+    align-items: center; justify-content: flex-start; text-align: center; padding: 24px;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
     background: rgba(5,4,10,0.86); backdrop-filter: blur(4px); transition: opacity .2s; }
+  /* centers when content fits, scrolls from the top when it doesn't */
+  .overlay > :first-child { margin-top: auto; }
+  .overlay > :last-child { margin-bottom: auto; }
   .overlay.hidden { opacity: 0; pointer-events: none; }
   .overlay h1 { font-size: clamp(1.9rem,7vw,3.2rem); color: #ffb454;
     text-shadow: 0 0 22px #ff6a00, 0 0 46px #7a2e00; letter-spacing: 2px; }
@@ -54,7 +58,7 @@
     width: 40px; height: 40px; border-radius: 50%; font-size: 1rem; cursor: pointer;
     background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.35); color: #fff; }
   #pauseBtn.hidden { display: none; }
-  .shop-sec { margin: 16px 0 8px; font-size: .72rem; letter-spacing: 2px; opacity: .65; font-weight: 800; }
+  .shop-sec { margin: 12px 0 6px; font-size: .72rem; letter-spacing: 2px; opacity: .65; font-weight: 800; }
   .shop-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 480px; }
   .shop-item { background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.2);
     border-radius: 12px; padding: 10px 12px; min-width: 92px; text-align: center; cursor: pointer;
@@ -155,7 +159,7 @@
 <button id="mineBtn" class="hidden" title="Mine rock">⛏️</button>
 <div id="lookHint" class="hidden">drag right side to look 👀</div>
 <button id="pauseBtn" class="hidden" title="Pause">⏸</button>
-<div id="ver">v4.6</div>
+<div id="ver">v5.2</div>
 
 <div class="overlay" id="deviceScreen">
   <h1>🎮 HOW ARE YOU PLAYING?</h1>
@@ -168,7 +172,8 @@
 <div class="overlay hidden" id="startScreen">
   <h1>🕯️ CAVE EXPLORER 3D</h1>
   <p>Explore the dark cave. Collect every glowing gem 💎, then escape through the portal 🟢.</p>
-  <div class="big" style="font-size:1.1rem">💎 <span id="gemBank">0</span> gems · 🍖 <span id="meatBank">0</span> meat</div>
+  <div class="big" style="font-size:1.1rem">⭐ Level <span id="levelBank">1</span> · 💎 <span id="gemBank">0</span> gems · 🍖 <span id="meatBank">0</span> meat</div>
+  <p class="hint" id="perkBank" style="margin:2px 0"></p>
   <div class="shop-sec">DIFFICULTY</div>
   <div id="diffRow" class="shop-row"></div>
   <div class="shop-sec">CAVE</div>
@@ -194,6 +199,8 @@
 <div class="overlay hidden" id="winScreen">
   <h1 style="color:#5adf9e;text-shadow:0 0 20px #5adf9e">ESCAPED! 🎉</h1>
   <div class="big" id="winTime"></div>
+  <div class="big" id="winLevel" style="color:#7fe3ff;text-shadow:0 0 16px #33cfff"></div>
+  <p id="winPerks" style="color:#9fffe0"></p>
   <p id="winMsg"></p>
   <button class="btn" id="againBtn">↻ NEW CAVE</button>
 </div>
@@ -258,6 +265,13 @@ function main() {
 
   const camera = new THREE.PerspectiveCamera(75, 1, 0.05, 60);
   camera.rotation.order = 'YXZ';
+  // device mode zooms out 2x (wider field of view → you see twice as much cave)
+  const BASE_FOV = 75;
+  function applyFov() {
+    const t = Math.tan(BASE_FOV * Math.PI / 360);
+    camera.fov = inputMode === 'device' ? Math.atan(t * 2) * 360 / Math.PI : BASE_FOV;
+    camera.updateProjectionMatrix();
+  }
 
   // lights: dim ambient + a warm torch that follows the player
   scene.add(new THREE.AmbientLight(0x180d06, 0.4));
@@ -304,7 +318,7 @@ function main() {
   let playerSpeed = 3.3;
   let shop;
   try { shop = JSON.parse(localStorage.getItem('cave3dShop')) || {}; } catch (e) { shop = {}; }
-  shop = Object.assign({ gems: 0, meat: 0, helpers: 0, torch: 'warm', owned: ['warm'], bright: false, fast: false, sharp: false, mighty: false, pickaxe: false }, shop);
+  shop = Object.assign({ gems: 0, meat: 0, helpers: 0, level: 1, torch: 'warm', owned: ['warm'], bright: false, fast: false, sharp: false, mighty: false, pickaxe: false }, shop);
   shop.pickaxe = true;   // the pickaxe is free — everyone starts with it
   function saveShop() { try { localStorage.setItem('cave3dShop', JSON.stringify(shop)); } catch (e) {} }
   let swordDmg = 1;
@@ -321,12 +335,23 @@ function main() {
     { id: 'sharp', name: 'Sharp Sword', icon: '🗡️', cost: 40 },
     { id: 'mighty', name: 'Mighty Sword', icon: '⚔️', cost: 80 }
   ];
+  // ---- level perks: every level makes you smarter and stronger ----
+  function lvlDmgBonus() { return Math.min(5, Math.floor(((shop.level || 1) - 1) / 3)); }        // 💪 +1 dmg every 3 levels
+  function lvlSpeedBonus() { return Math.min(0.6, ((shop.level || 1) - 1) * 0.03); }             // 💪 a bit faster
+  function lvlTorchBonus() { return Math.min(4, ((shop.level || 1) - 1) * 0.3); }                // 🧠 see farther
+  function lvlSense() { return Math.min(3, ((shop.level || 1) - 1) * 0.2); }                     // 🧠 sense the monster sooner
+  function lvlGemChance() { return Math.min(0.9, 0.58 + ((shop.level || 1) - 1) * 0.01); }       // 🧠 better mining luck
+  function perksText() {
+    return '⚔️ ' + ((shop.mighty ? 3 : shop.sharp ? 2 : 1) + lvlDmgBonus()) + ' dmg · 🏃 '
+      + ((shop.fast ? 4.4 : 3.3) + lvlSpeedBonus()).toFixed(1) + ' speed · ⛏️ '
+      + Math.round(lvlGemChance() * 100) + '% gem luck';
+  }
   function applyShop() {
     const tc = TORCHES.find(t => t.id === shop.torch) || TORCHES[0];
     torch.color.setHex(tc.color);
-    torch.distance = DIFFS[difficulty].torch + (shop.bright ? 4 : 0);
-    playerSpeed = shop.fast ? 4.4 : 3.3;
-    swordDmg = shop.mighty ? 3 : shop.sharp ? 2 : 1;
+    torch.distance = DIFFS[difficulty].torch + (shop.bright ? 4 : 0) + lvlTorchBonus();
+    playerSpeed = (shop.fast ? 4.4 : 3.3) + lvlSpeedBonus();
+    swordDmg = (shop.mighty ? 3 : shop.sharp ? 2 : 1) + lvlDmgBonus();
     updateViewmodels();
     updateItembar();
   }
@@ -467,7 +492,7 @@ function main() {
     const cx = Math.round(ax), cy = Math.round(az);
     if (cx > 0 && cy > 0 && cx < MAPW - 1 && cy < MAPH - 1 && map[cy][cx] === 1) {
       map[cy][cx] = 0; buildWalls();
-      if (Math.random() < 0.58) { shop.gems++; saveShop(); flashMsg('💎 A gem in the rock! +1'); }
+      if (Math.random() < lvlGemChance()) { shop.gems++; saveShop(); flashMsg('💎 A gem in the rock! +1'); }
       else flashMsg('⛏️ Rock broken');
     } else flashMsg('⛏️ No rock to mine');
   }
@@ -790,7 +815,7 @@ function main() {
     // proximity: danger glow, audio, camera shake
     const near = Math.max(0, Math.min(1, (8 - md) / 8));   // 0 far → 1 on top of you
     document.getElementById('danger').style.opacity = (near * near * 0.95).toFixed(3);
-    document.getElementById('warning').classList.toggle('hidden', md > 5.5);   // flash when it's close
+    document.getElementById('warning').classList.toggle('hidden', md > 5.5 + lvlSense());   // flash when it's close — sensed sooner at higher levels
     if (droneGain) { droneGain.gain.value = near * 0.28; if (drone2) drone2.frequency.value = 51.7 + near * 6; }
     // heartbeat quickens as it closes in
     if (md < 9) { hbTimer -= dt; if (hbTimer <= 0) { heartbeat(); hbTimer = 0.3 + (md / 9) * 0.95; } }
@@ -996,7 +1021,7 @@ function main() {
       const owned = (shop.helpers || 0) > i;
       const el = document.createElement('div');
       el.className = 'shop-item' + (owned ? ' owned' : '');
-      el.innerHTML = `<div class="nm">🤖 Helper ${i + 1}</div><div class="pr">${owned ? '✓ hired' : '5 🍖'}</div>`;
+      el.innerHTML = `<div class="nm">🤖 Helper ${i + 1}</div><div class="pr">${owned ? '✓ hired' : 'FREE'}</div>`;
       el.onclick = () => buyHelper();
       hr.appendChild(el);
     }
@@ -1033,14 +1058,12 @@ function main() {
   }
   function buyHelper() {
     if ((shop.helpers || 0) >= 3) { document.getElementById('shopMsg').textContent = 'You already have all 3 helpers!'; return; }
-    if ((shop.meat || 0) >= 5) {
-      shop.meat -= 5; shop.helpers = (shop.helpers || 0) + 1;
-      document.getElementById('shopMsg').textContent = 'Helper hired! It joins you in the next cave.';
-      saveShop(); renderShop();
-    } else document.getElementById('shopMsg').textContent = 'Not enough meat — defeat the monster to earn 5 🍖.';
+    shop.helpers = (shop.helpers || 0) + 1;
+    document.getElementById('shopMsg').textContent = 'Helper hired for FREE! It joins you in the next cave.';
+    saveShop(); renderShop();
   }
   function openShop() { renderShop(); document.getElementById('startScreen').classList.add('hidden'); document.getElementById('shopScreen').classList.remove('hidden'); }
-  function closeShop() { document.getElementById('shopScreen').classList.add('hidden'); document.getElementById('startScreen').classList.remove('hidden'); document.getElementById('gemBank').textContent = shop.gems; document.getElementById('meatBank').textContent = shop.meat || 0; }
+  function closeShop() { document.getElementById('shopScreen').classList.add('hidden'); document.getElementById('startScreen').classList.remove('hidden'); document.getElementById('gemBank').textContent = shop.gems; document.getElementById('meatBank').textContent = shop.meat || 0; document.getElementById('levelBank').textContent = shop.level || 1; document.getElementById('perkBank').textContent = perksText(); }
 
   function startGame() {
     initAudio();
@@ -1097,6 +1120,8 @@ function main() {
     document.getElementById('pauseBtn').classList.add('hidden');
     document.getElementById('gemBank').textContent = shop.gems;
     document.getElementById('meatBank').textContent = shop.meat || 0;
+    document.getElementById('levelBank').textContent = shop.level || 1;
+    document.getElementById('perkBank').textContent = perksText();
     document.getElementById('startScreen').classList.remove('hidden');
   }
   function win() {
@@ -1105,9 +1130,13 @@ function main() {
     document.getElementById('pauseBtn').classList.add('hidden');
     document.getElementById('danger').style.opacity = 0;
     document.getElementById('warning').classList.add('hidden');
-    // bank the gems you collected (+ a small speed-run bonus)
+    // bank the gems you collected (+ a small speed-run bonus) and LEVEL UP
     const earned = totalGems + (elapsed < 60 ? 3 : 0);
-    shop.gems += earned; saveShop();
+    shop.gems += earned;
+    shop.level = (shop.level || 1) + 1; saveShop();
+    applyShop();                          // new level = smarter & stronger, right away
+    document.getElementById('winLevel').textContent = '⬆️ LEVEL UP!  ⭐ Level ' + shop.level;
+    document.getElementById('winPerks').textContent = '🧠💪 You feel smarter and stronger:  ' + perksText();
     const isBest = best === 0 || elapsed < best;
     if (isBest) { best = elapsed; try { localStorage.setItem('cave3dBest', best); } catch (e) {} }
     document.getElementById('winTime').textContent = 'Time: ' + elapsed.toFixed(1) + 's';
@@ -1123,16 +1152,23 @@ function main() {
   document.getElementById('shopBtn').onclick = openShop;
   document.getElementById('shopBack').onclick = closeShop;
   const atk = document.getElementById('atkBtn');
-  atk.addEventListener('touchstart', e => { e.preventDefault(); attack(); }, { passive: false });
+  atk.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); attack(); }, { passive: false });
   atk.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); attack(); });
   const mineB = document.getElementById('mineBtn');
-  mineB.addEventListener('touchstart', e => { e.preventDefault(); mine(); }, { passive: false });
+  mineB.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); mine(); }, { passive: false });
   mineB.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); mine(); });
   document.getElementById('gemBank').textContent = shop.gems;
   document.getElementById('meatBank').textContent = shop.meat || 0;
+  document.getElementById('levelBank').textContent = shop.level || 1;
+  document.getElementById('perkBank').textContent = perksText();
   document.querySelectorAll('#itembar .slot').forEach(s => {
     s.addEventListener('click', () => selectSlot(+s.dataset.slot));
-    s.addEventListener('touchstart', e => { e.preventDefault(); selectSlot(+s.dataset.slot); }, { passive: false });
+    // on touch, tapping a slot selects AND uses it (no F key on phones)
+    s.addEventListener('touchstart', e => {
+      e.preventDefault(); e.stopPropagation();
+      selectSlot(+s.dataset.slot, true);
+      useSlot();
+    }, { passive: false });
   });
   selectSlot(0, true);
   renderDiff();
@@ -1172,6 +1208,7 @@ function main() {
   // ---- device select: PC = keyboard/mouse, Device = joystick + touch look ----
   function configureControls(mode) {
     inputMode = mode;
+    applyFov();
     const dev = mode === 'device';
     document.getElementById('joy').classList.toggle('hidden', !dev);
     document.getElementById('lookHint').classList.toggle('hidden', !dev);
